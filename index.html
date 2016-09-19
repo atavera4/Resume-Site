@@ -9,7 +9,7 @@
   <link href="css/site.css" rel="stylesheet">
   <link href='https://fonts.googleapis.com/css?family=Lato:100,300' rel='stylesheet' type='text/css'>
   <title> My Site </title>
-  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
   <script type="text/javascript" src="js/jQuery.js"></script>
   <script type="text/javascript" src="js/bootstrap.min.js"></script>
   <link href="css/site.css" rel="stylesheet">
@@ -31,10 +31,11 @@
             <a class="navbar-brand" href="#">Ariel Taveras</a>
           </div>
           <ul class="nav navbar-nav">
-            <li class="active"><a href="#">Home</a></li>
-            <li><a href="#">Page 1</a></li>
-            <li><a href="#">Page 2</a></li>
-            <li><a href="#">Page 3</a></li>
+            <li class="active"><a href="Website.html">Home</a></li>
+            <li><a href='Summer2015.html' id="Summer2015">Summer 2015</a></li>
+            <li><a href="Fall2015.html" id="Fall2015">Fall 2015</a></li>
+            <li><a href="Spring2016.html" id="Spring2016">Spring 2016</a></li>
+            <li><a href="Summer2016.html" id-"Summer2016">Summer 2016</a></li>
           </ul>
         </div>
       </nav>
@@ -55,9 +56,9 @@
           </ul>
         </div>
         <div class="">
-          <a href="http://time.is/New_York" id="time_is_link" rel="nofollow" style="font-size:30px">Time in New York:</a>
+          <a href="https://time.is/New_York" id="time_is_link" rel="nofollow" style="font-size:30px">Time in New York:</a>
           <span id="New_York_z161" style="font-size:25px"></span>
-          <script src="http://widget.time.is/en.js"></script>
+          <script src="https://widget.time.is/en.js"></script>
           <script>
             time_is_widget.init({New_York_z161:{template:"TIME<br>DATE<br>SUN", time_format:"12hours:minutes:secondsAMPM", date_format:"dayname, monthname dnum, year", sun_format:"Sunrise: srhour:srminute Sunset: sshour:ssminute", coords:"40.7142700,-74.0059700"}});
           </script>
@@ -69,11 +70,11 @@
       <div class = "col-md-4 col-title-Ariel title-margin text-center text-primary">Ariel Taveras <h1 id='1' class="text-center"> Resume and Portfolio </h1></div>
       <!-- <h1 id='1' class="text-center"> Resume and Portfolio </h1> -->
       <div class = "col-md-4">
-        <a href="http://www.accuweather.com/en/us/new-york-ny/10007/weather-forecast/349727" class="aw-widget-legal">
+        <a href="https://www.accuweather.com/en/us/new-york-ny/10007/weather-forecast/349727" class="aw-widget-legal">
         <!--
         By accessing and/or using this code snippet, you agree to AccuWeather’s terms and conditions (in English) which can be found at http://www.accuweather.com/en/free-weather-widgets/terms and AccuWeather’s Privacy Statement (in English) which can be found at http://www.accuweather.com/en/privacy.
         -->
-        </a><div id="awcc1467248233846" class="aw-widget-current"  data-locationkey="" data-unit="f" data-language="en-us" data-useip="true" data-uid="awcc1467248233846"></div><script type="text/javascript" src="http://oap.accuweather.com/launch.js"></script>
+      </a><div id="awcc1467248233846" class="aw-widget-current"  data-locationkey="" data-unit="f" data-language="en-us" data-useip="true" data-uid="awcc1467248233846"></div><script type="text/javascript" src="https://oap.accuweather.com/launch.js"></script>
       </div>
     </div>
 
@@ -81,38 +82,42 @@
     <div class="row">
       <hr>
       <div class="col-md-4">
-        <img id='Profile Pic' src="images/9.jpg" class="img-responsive img-rounded" alt="Responsive image">
+        <h3> Profile Pic </h3>
+        <img id='Profile Pic' src="images/9.jpg" class="img-responsive img-circle" alt="Responsive image">
       </div>
 
       <div class="col-md-5">
         <h3 class="text-left" > Bio and Description: </h3>
-        <blockquote class="text-primary DescriptionScrollContainer">
-          <div class=" marquee">
+        <blockquote class="text-primary Font-Ariel5 ">
+          <div class="InfoBackground text-center">
             <div>Name: Ariel Taveras</div>
             <div>School: Binghamton University</div>
-            <div>
+            <p class="text-center ">
               Insert my Bio here and make this scrollable also make the pic a slide show and add carrousell beneath this.
               also add weather and time to top right corner of screen
                and add the stocks widget.
               Also a web app that track the weather and uses that to determine what you should eat and watch
               based on recomendations and info from certain sites. It could also maybe recommend places and keep track of your favortie items.
-            </div>
+            </p>
           </div>
         </blockquote>
       </div>
 
       <div class="col-md-3">
-        <div id="PanelColorTop" class="panel PanelColorTopThemeWhite">
+        <!-- <div id="PanelColorTop" class="panel PanelColorTopThemeWhite ">
           <div id="PanelColor" class="panel-heading PanelColorThemeWhite">
             <h3 class="text-left">Info and Contact Links: </h3>
+          </div> -->
+        <h3 class="text-left " > Info and Contact Links: </h3>
+        <blockquote class=" text-primary ">
+          <div class="InfoBackground2">
+            <div id ='ResumePDF' class="text-left"></div>
+            <div id='linkedin' class="text-left"></div>
+            <div id="email" class="text-left"> </div>
+            <div class="text-left"> Phone </div>
           </div>
-          <blockquote>
-          <div id ='ResumePDF' class="text-left"></div>
-          <div id='linkedin' class="text-left"></div>
-          <div id="email" class="text-left"> </div>
-          <div class="text-left"> Phone </div>
-          </blockquote>
-        </div>
+        </blockquote>
+
 
 
       </div>
@@ -288,15 +293,16 @@
         </div>
       </div>
 
-    </div>
+      <div class="row">
+        <canvas id="canvas"></canvas>
+      </div>
 
-    <div class="row">Insert Project content here
-          asdfasdfdasdlkfjasjdeaifals;djfal;sdkjflas;kdjf
-        asdl;kfja;lsdjfl;asdkjfl;asdjkfl;kasjd;lfjds;fja
-      asdl;fjasldjfa;sdlkfj;alsdkfj;alskdfj;laskdjf
-      as;dlfjas;ldkfj;alsdkjfl;askdjfl;askdjfl;asdkjfas;dljfasdf;laskdjf;lajsdf;laksjdf;lajsf;alskdjf;alsjdf
-      as;ldfjas;ldkjf;alskdjfl;asjdf;lasjf;jasd;fljasd;fjasl;dkfja;sdfj;alsdkjfjfk;lasdkjf;asldkjf;alsdjkf;
-    </div>
+  </div>
+
+
+
+
+
     <div class="row">It will be a vertical scroll wheel for each column!!</div>
     <div class="row">Insert Project content here</div>
     <div class="row">It will be a vertical scroll wheel for each column!!</div>
@@ -319,11 +325,16 @@
     <div class="row">Insert Project content here</div>
     <div class="row">It will be a vertical scroll wheel for each column!!</div>
     <div class="row">Insert Project content here</div>
-    <div class="row">It will be a vertical scroll wheel for each column!!</div>
+    <!-- <div class="row footer">It will be a vertical scroll wheel for each column!!</div> -->
+
+
 
 
 </body>
+<div class="row"><hr></div>
+<div class="row footer"><h3>INSERT FOOTER CONTENT HERE</h3> </div>
 
 <script src="js/Ariel_Site.js"></script>
+<script src=""
 
 </html>
