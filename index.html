@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Roboto:100italic' rel='stylesheet' type='text/css'>
+  <link href="css/bootstrap-theme.css" rel="stylesheet">
+  <link href="css/bootstrap.css"  rel="stylesheet">
+  <link href="css/site.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lato:100,300' rel='stylesheet' type='text/css'>
+  <title> My Site </title>
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <script type="text/javascript" src="js/jQuery.js"></script>
+  <script type="text/javascript" src="js/bootstrap.min.js"></script>
+  <link href="css/site.css" rel="stylesheet">
+
+  <script src="https://www.google.com/uds/api?file=uds.js&v=1.0&key=YOURKEYHERE" type="text/javascript"></script>
+
+  <script language="Javascript" type="text/javascript"> //<![CDATA[ // Create a search control var searchControl = new GSearchControl(); // create a search object searchControl.addSearcher(new GwebSearch()); // tell Google where to draw the searchbox searchControl.draw(document.getElementById("search-box")); } GSearch.setOnLoadCallback(OnLoad); //]]> </script>
+
+</head>
+
+<body id="BodyBG" class="BodyBackground1 ">
+
+  <div id="Main" class="container TransparentBackgroundWhite ">
+
+    <div class="row">
+      <nav  id="navbar" class="navbar navbar-inverse">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <a class="navbar-brand" href="#">Ariel Taveras</a>
+          </div>
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Home</a></li>
+            <li><a href="#">Page 1</a></li>
+            <li><a href="#">Page 2</a></li>
+            <li><a href="#">Page 3</a></li>
+          </ul>
+        </div>
+      </nav>
+    </div>
+
+
+
+
+    <div class="row">
+      <div class="col-md-4">
+        <div class="dropdown">
+          <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown"> Change Theme
+          <span class="caret"></span></button>
+          <ul class="dropdown-menu">
+            <li><a id="theme1" href="#">Black</a></li>
+            <li><a id="theme2" href="#">White</a></li>
+            <li><a id="theme3" href="#">Red</a></li>
+          </ul>
+        </div>
+        <div class="">
+          <a href="http://time.is/New_York" id="time_is_link" rel="nofollow" style="font-size:30px">Time in New York:</a>
+          <span id="New_York_z161" style="font-size:25px"></span>
+          <script src="http://widget.time.is/en.js"></script>
+          <script>
+            time_is_widget.init({New_York_z161:{template:"TIME<br>DATE<br>SUN", time_format:"12hours:minutes:secondsAMPM", date_format:"dayname, monthname dnum, year", sun_format:"Sunrise: srhour:srminute Sunset: sshour:ssminute", coords:"40.7142700,-74.0059700"}});
+          </script>
+        </div>
+      </div>
+
+
+      <!-- <div class = "col-title-Ariel title-margin text-left text-primary"> Ariel Taveras </div> -->
+      <div class = "col-md-4 col-title-Ariel title-margin text-center text-primary">Ariel Taveras <h1 id='1' class="text-center"> Resume and Portfolio </h1></div>
+      <!-- <h1 id='1' class="text-center"> Resume and Portfolio </h1> -->
+      <div class = "col-md-4">
+        <a href="http://www.accuweather.com/en/us/new-york-ny/10007/weather-forecast/349727" class="aw-widget-legal">
+        <!--
+        By accessing and/or using this code snippet, you agree to AccuWeather’s terms and conditions (in English) which can be found at http://www.accuweather.com/en/free-weather-widgets/terms and AccuWeather’s Privacy Statement (in English) which can be found at http://www.accuweather.com/en/privacy.
+        -->
+        </a><div id="awcc1467248233846" class="aw-widget-current"  data-locationkey="" data-unit="f" data-language="en-us" data-useip="true" data-uid="awcc1467248233846"></div><script type="text/javascript" src="http://oap.accuweather.com/launch.js"></script>
+      </div>
+    </div>
+
+
+    <div class="row">
+      <hr>
+      <div class="col-md-4">
+        <img id='Profile Pic' src="images/9.jpg" class="img-responsive img-rounded" alt="Responsive image">
+      </div>
+
+      <div class="col-md-5">
+        <h3 class="text-left" > Bio and Description: </h3>
+        <blockquote class="text-primary DescriptionScrollContainer">
+          <div class=" marquee">
+            <div>Name: Ariel Taveras</div>
+            <div>School: Binghamton University</div>
+            <div>
+              Insert my Bio here and make this scrollable also make the pic a slide show and add carrousell beneath this.
+              also add weather and time to top right corner of screen
+               and add the stocks widget.
+              Also a web app that track the weather and uses that to determine what you should eat and watch
+              based on recomendations and info from certain sites. It could also maybe recommend places and keep track of your favortie items.
+            </div>
+          </div>
+        </blockquote>
+      </div>
+
+      <div class="col-md-3">
+        <div id="PanelColorTop" class="panel PanelColorTopThemeWhite">
+          <div id="PanelColor" class="panel-heading PanelColorThemeWhite">
+            <h3 class="text-left">Info and Contact Links: </h3>
+          </div>
+          <blockquote>
+          <div id ='ResumePDF' class="text-left"></div>
+          <div id='linkedin' class="text-left"></div>
+          <div id="email" class="text-left"> </div>
+          <div class="text-left"> Phone </div>
+          </blockquote>
+        </div>
+
+
+      </div>
+
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+        <div class="col-Ariel title-margin">
+          <small>Content</small>
+        </div>
+        <hr>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-4">
+        <div id="myCarousel" class="carousel slide" data-ride="carousel">
+          <!-- Indicators -->
+          <ol class="carousel-indicators">
+            <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
+            <li data-target="#myCarousel" data-slide-to="1"></li>
+            <li data-target="#myCarousel" data-slide-to="2"></li>
+            <li data-target="#myCarousel" data-slide-to="3"></li>
+          </ol>
+
+          <!-- Wrapper for slides -->
+          <div class="carousel-inner" role="listbox">
+            <div class="item active">
+              <img src="images/10.jpg" alt="Chania">
+              <div class="carousel-caption">
+                <h3 class="text-info Font-Ariel">Place Holder</h3>
+              </div>
+            </div>
+
+            <div class="item">
+              <img src="images/11.jpg" alt="Chania">
+              <div class="carousel-caption">
+                <h3 class="text-info Font-Ariel">Place Holder</h3>
+              </div>
+            </div>
+
+            <div class="item">
+              <img src="images/12.jpg" alt="Flower">
+              <div class="carousel-caption">
+                <h3 class="text-info Font-Ariel">Place Holder</h3>
+              </div>
+            </div>
+
+            <div class="item">
+              <img src="images/13.jpg" alt="Flower">
+              <div class="carousel-caption">
+                <h3 class="text-danger Font-Ariel">Place Holder</h3>
+              </div>
+            </div>
+          </div>
+
+          <!-- Left and right controls -->
+          <a class="left carousel-control" href="#myCarousel" role="button" data-slide="prev">
+            <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+            <span class="sr-only">Previous</span>
+          </a>
+          <a class="right carousel-control" href="#myCarousel" role="button" data-slide="next">
+            <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+            <span class="sr-only">Next</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div id="myCarousel2" class="carousel slide" data-ride="carousel">
+          <!-- Indicators -->
+          <ol class="carousel-indicators">
+            <li data-target="#myCarousel2" data-slide-to="0" class="active"></li>
+            <li data-target="#myCarousel2" data-slide-to="1"></li>
+            <li data-target="#myCarousel2" data-slide-to="2"></li>
+            <li data-target="#myCarousel2" data-slide-to="3"></li>
+          </ol>
+
+          <!-- Wrapper for slides -->
+          <div class="carousel-inner" role="listbox">
+            <div class="item active">
+              <img src="images/11.jpg" alt="Chania">
+              <div class="carousel-caption">
+                <h3 class="text-info Font-Ariel">Place Holder</h3>
+              </div>
+            </div>
+
+            <div class="item">
+              <img src="images/12.jpg" alt="Chania">
+              <div class="carousel-caption">
+                <h3 class="text-info Font-Ariel">Place Holder</h3>
+              </div>
+            </div>
+
+            <div class="item">
+              <img src="images/13.jpg" alt="Flower">
+              <div class="carousel-caption">
+                <h3 class="text-info Font-Ariel">Place Holder</h3>
+              </div>
+            </div>
+
+            <div class="item">
+              <img src="images/10.jpg" alt="Flower">
+              <div class="carousel-caption">
+                <h3 class="text-info Font-Ariel">Place Holder</h3>
+              </div>
+            </div>
+          </div>
+
+          <!-- Left and right controls -->
+          <a class="left carousel-control" href="#myCarousel2" role="button" data-slide="prev">
+            <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+            <span class="sr-only">Previous</span>
+          </a>
+          <a class="right carousel-control" href="#myCarousel2" role="button" data-slide="next">
+            <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+            <span class="sr-only">Next</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div id="myCarousel3" class="carousel slide" data-ride="carousel">
+          <!-- Indicators -->
+          <ol class="carousel-indicators">
+            <li data-target="#myCarousel3" data-slide-to="0" class="active"></li>
+            <li data-target="#myCarousel3" data-slide-to="1"></li>
+            <li data-target="#myCarousel3" data-slide-to="2"></li>
+            <li data-target="#myCarousel3" data-slide-to="3"></li>
+          </ol>
+
+          <!-- Wrapper for slides -->
+          <div class="carousel-inner" role="listbox">
+            <div class="item active">
+              <img src="images/12.jpg" alt="Chania">
+              <div class="carousel-caption">
+                <h3 class="text-info Font-Ariel">Place Holder</h3>
+              </div>
+            </div>
+
+            <div class="item">
+              <img src="images/13.jpg" alt="Chania">
+              <div class="carousel-caption">
+                <h3 class="text-info Font-Ariel">Place Holder</h3>
+              </div>
+            </div>
+
+            <div class="item">
+              <img src="images/10.jpg" alt="Flower">
+              <div class="carousel-caption">
+                <h3 class="text-info Font-Ariel">Place Holder</h3>
+              </div>
+            </div>
+
+            <div class="item">
+              <img src="images/11.jpg" alt="Flower">
+              <div class="carousel-caption">
+                <h3 class="text-info Font-Ariel">Place Holder</h3>
+              </div>
+            </div>
+          </div>
+
+          <!-- Left and right controls -->
+          <a class="left carousel-control" href="#myCarousel3" role="button" data-slide="prev">
+            <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+            <span class="sr-only">Previous</span>
+          </a>
+          <a class="right carousel-control" href="#myCarousel3" role="button" data-slide="next">
+            <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+            <span class="sr-only">Next</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="row">Insert Project content here
+          asdfasdfdasdlkfjasjdeaifals;djfal;sdkjflas;kdjf
+        asdl;kfja;lsdjfl;asdkjfl;asdjkfl;kasjd;lfjds;fja
+      asdl;fjasldjfa;sdlkfj;alsdkfj;alskdfj;laskdjf
+      as;dlfjas;ldkfj;alsdkjfl;askdjfl;askdjfl;asdkjfas;dljfasdf;laskdjf;lajsdf;laksjdf;lajsf;alskdjf;alsjdf
+      as;ldfjas;ldkjf;alskdjfl;asjdf;lasjf;jasd;fljasd;fjasl;dkfja;sdfj;alsdkjfjfk;lasdkjf;asldkjf;alsdjkf;
+    </div>
+    <div class="row">It will be a vertical scroll wheel for each column!!</div>
+    <div class="row">Insert Project content here</div>
+    <div class="row">It will be a vertical scroll wheel for each column!!</div>
+    <div class="row">Insert Project content here</div>
+    <div class="row">It will be a vertical scroll wheel for each column!!</div>
+    <div class="row">Insert Project content here</div>
+    <div class="row">It will be a vertical scroll wheel for each column!!</div>
+    <div class="row">Insert Project content here</div>
+    <div class="row">It will be a vertical scroll wheel for each column!!</div>
+    <div class="row">Insert Project content here</div>
+    <div class="row">It will be a vertical scroll wheel for each column!!</div>
+    <div class="row">Insert Project content here</div>
+    <div class="row">It will be a vertical scroll wheel for each column!!</div>
+    <div class="row">Insert Project content here</div>
+    <div class="row">It will be a vertical scroll wheel for each column!!</div>
+    <div class="row">Insert Project content here</div>
+    <div class="row">It will be a vertical scroll wheel for each column!!</div>
+    <div class="row">Insert Project content here</div>
+    <div class="row">It will be a vertical scroll wheel for each column!!</div>
+    <div class="row">Insert Project content here</div>
+    <div class="row">It will be a vertical scroll wheel for each column!!</div>
+    <div class="row">Insert Project content here</div>
+    <div class="row">It will be a vertical scroll wheel for each column!!</div>
+
+
+</body>
+
+<script src="js/Ariel_Site.js"></script>
+
+</html>

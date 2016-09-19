@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script type="text/javascript" src="js/jQuery.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Roboto:100italic' rel='stylesheet' type='text/css'>
+  <link href="css/bootstrap-theme.css" rel="stylesheet">
+  <link href="css/bootstrap.css"  rel="stylesheet">
+  <link href="css/site.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lato:100,300' rel='stylesheet' type='text/css'>
+  <title> My Site </title>
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <script type="text/javascript" src="js/jQuery.js"></script>
+  <script type="text/javascript" src="js/bootstrap.min.js"></script>
+  <link href="css/site.css" rel="stylesheet">
+
+  <script src="https://www.google.com/uds/api?file=uds.js&v=1.0&key=YOURKEYHERE" type="text/javascript"></script>
+  <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js?autoload=true&amp;skin=sunburst&amp;lang=css" defer="defer"></script>
+
+
+</head>
+
+<body class="BodyBackground1 " onload="prettyPrint()">
+  <div id="Main" class="container TransparentBackgroundBlack">
+
+    <div class="row Description-font">
+      <p>
+
+        <pre>
+
+
+          This Assignment involved ????????
+        </pre>
+      </p>
+    </div>
+
+  <div class="row">
+
+    <!-- <a class= "col-md-12 Font-Ariel2" id="button1" href="#">Show/Hide C++ File</a> -->
+
+    <pre class="prettyprint" id="code_1" style="border:4px solid #88c">
+      <code >
+
+        import socket
+        import sys
+        import time
+        import string
+        import datetime
+
+        #connect using tcp    ------ 1
+        def Connect(IP):
+            TCP_IP = IP
+            TCP_PORT = 41795
+            BUFFER_SIZE = 1024
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            print('Checking connection')
+            while 1:
+                try:
+                    s.connect((TCP_IP, TCP_PORT))
+                    restored = 1
+                except:
+                    print('.',end="")
+                    restored = 0
+                if restored == 1:
+                    print('Connection Established')
+                    break
+            return s
+
+
+        def delPrevTemp(s):
+            s.send('delete temp\*.*\r\n'.encode('ascii'))
+            time.sleep(2)
+            return
+
+
+        def WaitForReboot(s):
+            print('REACHED WaitForReboot')
+            time.sleep(10)
+            start_time = int(round(time.time()))
+            s.send('dir temp\r\n'.encode('ascii'))# This command has no real purppose other than to trigger a response from the device.-
+            while 1:                                            #If this random message/cmd is sent to the device then the device will not send any data and the program will get stuck.
+                #s.send('dir temp\r\n'.encode('ascii'))
+                end_time = int(round(time.time()))
+                #time.sleep(1)
+                #s.setblocking(0)
+                time.sleep(5)
+                print('\nGOT TO PROBLEM\n')
+                try:
+                    y = s.recv(1024)# INCREASE THE SIZE OF THE IMPUT BUFFER
+                    print('\nGOT TO PROBLEM22222\n')
+                    print('\n', y, '\n')
+                except:
+                    print('PROBLEM STILL THERE')
+
+                if 'Channel init complete' in y.decode('utf-8'):
+                    print('SYSTEM INITIALIZED\n')
+                    #print(y.decode('utf-8'))
+                    time.sleep(65)
+                    break
+                #elif (end_time - start_time) >= 300:
+                #    print('TIMOUT OF 5 MINUTES REACHED. Deleting files and CONTINUING WITH THE PROGRAM ANYWAY')
+                #    delPrevTemp(s)
+                #    break
+                else:
+                    print('.',end="")
+            #s.setblocking(1)
+            return
+
+
+        def WaitForPrompt(s):
+             print('SEND WAIT')
+            # s.send('asdf'.encode('ascii'))
+             while 1:
+                x = s.recv(1024)
+                if 'DMPS3-4K-150-C'.encode('ascii') in x:
+                    time.sleep(2)
+                    break
+                else: print('.', end="")
+             return
+
+        def CheckVersions10(feedback, feedback2):
+            if( '[v1.2627.00010'.encode('ascii') in feedback and '[v1.2627.00010'.encode('ascii') in feedback2):
+                print(' 9 and 11 found')
+                return '9 and 11'
+
+            elif( '[v1.2627.00010'.encode('ascii') in feedback and '[v1.2627.00001'.encode('ascii') not in feedback2):
+                print(' correct ver. for 9 found but correct ver. for 11 was not')
+                return '9'
+
+            elif( '[v1.2627.00010'.encode('ascii') not in feedback and '[v1.2627.00010'.encode('ascii') in feedback2):
+                print('correct ver. for 9 NOT found, but ver. for 11 found')
+                return '11'
+            elif( '[v1.2627.00010'.encode('ascii') not in feedback and '[v1.2627.00010'.encode('ascii') not in feedback2):
+                print(' BOTH 9 and 11 NOT found !!')
+                return 'none'
+            else:
+                print('problem occured in this function')
+            return 'p'
+
+        def CheckVersions13(feedback, feedback2):
+            if( '[v1.2627.00013'.encode('ascii') in feedback and '[v1.2627.00013'.encode('ascii') in feedback2):
+                print(' 9 and 11 found')
+                return '9 and 11'
+
+            elif( '[v1.2627.00013'.encode('ascii') in feedback and '[v1.2627.00013'.encode('ascii') not in feedback2):
+                print(' correct ver. for 9 found but correct ver. for 11 was not')
+                return '9'
+
+            elif( '[v1.2627.00013'.encode('ascii') not in feedback and '[v1.2627.00013'.encode('ascii') in feedback2):
+                print('correct ver. for 9 NOT found, but ver. for 11 found')
+                return '11'
+            elif( '[v1.2627.00013'.encode('ascii') not in feedback and '[v1.2627.00013'.encode('ascii') not in feedback2):
+                print(' BOTH 9 and 11 NOT found !!')
+                return 'none'
+            else:
+                print('problem occured in this function')
+            return 'p'
+
+        def FirstSequence(s, file_select):##COPIES THE FILES INTO TEMP DIRECTORY
+            print('SEQUENCE 1 REACHED')
+            copy = "copy user\\dm-mf10x1-c-in_1.2627.00010.upg \\temp\r\n"
+            copy2 = "copy user\\dm-mf10x1-c-out_1.2627.00010.upg \\temp\r\n"
+            if file_select == 1:
+            #COPY 1st FILE
+                time.sleep(1)
+                s.send(copy.encode('ascii'))
+                feedback = s.recv(1024)
+                print('recieved feedback after copy cmd is:',feedback.decode('utf-8'))
+                WaitForPrompt(s)
+                print('FINISHED!')
+                #COPY 2nd FILE
+                s.send(copy2.encode('ascii'))
+                feedback2 = s.recv(1024)
+                print('recieved feedback after 2ND copy cmd is:',feedback2.decode('utf-8'))
+                print('Current Version was not default so Both files have been copied onto the temp directory')
+            else:
+                print('version is not the default therefore files were not copied into temp folder and the default version will be loaded onto the ARMS')
+
+            time.sleep(2)
+            #CHECK THE ARMS
+            check_arm_version = 'dmrcon 9 ver\r\n'
+            check_arm_version2 = 'dmrcon 11 ver\r\n'
+            print('checking both ARM versions: ')
+            file.write('checking both ARM versions: \n')
+            # first arm check ver 9
+            s.send(check_arm_version.encode('ascii'))
+            time.sleep(10)
+            feedback = s.recv(1024)
+            print('Arm ver. 9 is:', feedback)
+            file.write('ARM ver 9 is: \n')
+            time.sleep(3)
+            #second arm check ver 11
+            s.send(check_arm_version2.encode('ascii'))
+            time.sleep(1)
+            feedback2 = s.recv(1024)
+            print('Arm ver 11 is:', feedback2)
+
+            file.write('ARM ver. 11 is: \n')
+            time.sleep(3)
+            if file_select == 0:# this will start at 1 because the files in temp folder have not been programs yet when this script first starts.
+                result = CheckVersions10(feedback, feedback2)
+            else:
+                result = CheckVersions13(feedback, feedback2)
+            time.sleep(1)
+            # ArmBitSet
+            s.send('armbitset 3\r\n'.encode('ascii'))
+            time.sleep(10)
+            #print('armbitset out:', s.recv(1024).decode('utf-8'))
+            file.write('armbitset out: ')
+            #file.write(s.recv(1024).decode('utf-8'))
+            file.write('\n')
+            time.sleep(5)
+            #REBOOT
+            s.send('reboot\r\n'.encode('ascii'))
+            time.sleep(1)
+            #feedback3 = s.recv(1024)
+
+            #print("reboot out: \n", feedback3.decode('utf-8'), end="")
+            time.sleep(1)
+            #s.send('y'.encode('ascii')) # send a yes to the promt to reset
+            #print('responded with a yes')
+            return
+
+
+
+        def SecondSequence(s, file_select):  #----2
+
+            check_arm_version = 'dmrcon 9 ver\r\n'
+            check_arm_version2 = 'dmrcon 11 ver\r\n'
+            print('checking both ARM versions:')
+            file.write('checking both ARM versions: \n')
+            # first arm check ver 9
+            s.send(check_arm_version.encode('ascii'))
+            time.sleep(1)
+            feedback = s.recv(1024)
+            print('Arm ver. 9 is:', feedback)
+            file.write('ARM ver 9 is: \n')
+            time.sleep(3)
+            #second arm check ver 11
+            s.send(check_arm_version2.encode('ascii'))
+            time.sleep(1)
+            feedback2 = s.recv(1024)
+            print('Arm ver 11 is:', feedback2)
+
+            file.write('ARM ver. 11 is: \n')
+            time.sleep(3)
+            if file_select == 0:
+                result = CheckVersions10(feedback, feedback2)
+            else:
+                result = CheckVersions13(feedback, feedback2)
+            time.sleep(1)
+            # ArmBitSet
+            s.send('armbitset 3\r\n'.encode('ascii'))
+            time.sleep(1)
+            print('armbitset out:', s.recv(1024).decode('utf-8'))
+            #file.write('armbitset out:'+ s.recv(1024).decode('utf-8'))
+            #file.write('\n')
+            time.sleep(5)
+            print('GOT HERE TOO')
+            time.sleep(5)
+            #REBOOT
+            s.send('reboot\r\n'.encode('ascii'))
+            time.sleep(1)
+            feedback3 = s.recv(1024)
+            #print("reboot out: \n", feedback2.decode('utf-8'), end="")
+            #file.write("reboot out: \n", feedback2.decode('utf-8'))
+            time.sleep(2)
+            print('RESULT IS: ', result)
+            return result
+
+        def getSuperUser(s):
+            password = '7j1IKiePF7NU0qXw'
+            r = 'sudo -SN:CrEngSuperuser -SP:7j1IKiePF7NU0qXw hiddendirectoryex show\r\n'
+            str = ""
+            disp_temp = ("sudo -SN:CrEngSuperuser -SP:", password, "hiddendirectoryex show\r\n")
+            dt = str.join(disp_temp)
+            root = 'sudo -SN:CrEngSuperuser -SP:' + password + 'hiddendirectoryex show\r\n'
+            s.send(r.encode('ascii'))
+            print('root access granted\r\n')
+
+
+        def CheckIfTempReset(s):
+            s.send('dir \\temp\r\n'.encode('ascii'))
+            time.sleep(2)
+            temp_folder = s.recv(1024).decode('utf-8')
+            print(temp_folder)
+            if (('dm-mf10x1-c-out_1.2617.00010.upg' in temp_folder) or 'dm-mf10x1-c-in_1.2617.00010.upg' in temp_folder):
+                print('The temp folder was not cleared on RESET!!\n Deleting the files manually.\n')
+                file.write('The temp folder was not cleared on RESET!!\n Deleting the files manually.\n')
+                delPrevTemp(s)
+
+            return
+
+
+        def WhichVersion(s):
+            check_arm_version = 'dmrcon 9 ver\r\n'
+            s.send(check_arm_version.encode('ascii'))
+            time.sleep(1)
+            feedback = s.recv(1024)
+            print('Arm version currently installed is :', feedback)
+            if( '[v1.2627.00013'.encode('ascii') in feedback):
+                print('CURRENT STARTING VERSION IS 13 AT THE START OF THIS PROGRAM')
+                return 1
+            else:
+                print('CURRENT STARTING VERSION IS 10 AT THE START OF THIS PROGRAM')
+                return 0
+
+
+        #main
+        #IP = str(sys.argv[1])
+        #password = str(sys.argv[2])
+        #print('IP ADDDRESS IS:  ', IP)
+        #print('   password is:  ', password)
+        file = open('ARM_Version_check', 'w')
+        file.write('Program has started \n')
+        print("BEGINNIG BY COPYING BOTH FILES INTO TEMP FOLDER AND THEN REBOOTING FIRST\n")
+        print("THEN IT WILL CONNECT AND CHECK VERSON WITHOUT COPYING ANY FILES\n")
+        print("The 2 sequences above will be repeated until a match is not found")
+        current_time = datetime.datetime.now().time()
+        print('start time of entire program is: ',str(current_time.isoformat()))
+        counter = 0
+        sequence2_end_time = 0
+        sequence2_start_time = 0
+        file_select = 1
+        start_time = int(round(time.time()))
+        while 1:
+            loop_start_time = int(round(time.time()))
+            s = Connect('172.30.145.121')
+            if counter > 0:
+                print('Waiting for system to initialize')
+                #file.write('Waiting 5 minutes for system to reboot and install \n')
+                #time.sleep(360)
+                WaitForReboot(s)
+                time.sleep(1)
+                file_select = WhichVersion(s)
+                sequence2_end_time = int(round(time.time()))
+                current_time = datetime.datetime.now().time()
+                print('\ntime at the end of the reboot with the DEFAULT VERSION 13 ',str(current_time.isoformat()))
+                print('\ntime taken for this sequence is: ', (sequence2_end_time - sequence2_start_time) - 40, 'seconds')
+                file.write('time taken for this sequence is: ')
+                #file.write(str(sequence_end_time - sequence_start_time))
+                file.write('seconds\n')
+            else:
+                file_select = WhichVersion(s)
+                print('FILE SELECT IS: ', file_select)
+                time.sleep(1)
+
+            time.sleep(2)
+            getSuperUser(s)
+            time.sleep(5)
+            #CheckIfTempReset(s)
+            time.sleep(1)
+            current_time = datetime.datetime.now().time()
+            print('\nstart time of first sequence is: ',str(current_time.isoformat()))
+            FirstSequence(s, file_select)
+            sequence_start_time = int(round(time.time()))
+
+            #break
+            print('first sequence complete. Waiting  for system to reboot')
+           ## file.write('first sequence complete. Waiting 5 minutes for system to reboot and install \n')
+           # #time.sleep(360)
+            time.sleep(1)
+            #BEGIN SECOND SEQUENCE
+
+            s = Connect('172.30.145.121')
+            WaitForReboot(s)
+            current_time = datetime.datetime.now().time()
+            print('\nend time of first sequence and reboot is: ',str(current_time.isoformat()))
+            sequence_end_time = int(round(time.time()))
+            print('time taken for copy sequence is: ', (sequence_end_time - sequence_start_time)- 40, 'seconds')
+            file.write('time taken for copy sequence is: ')
+            file.write(str(sequence_end_time - sequence_start_time))
+            file.write('seconds\n')
+            file_select = not file_select
+            result = SecondSequence(s, file_select)
+            sequence2_start_time = int(round(time.time()))
+            #break
+            if result == '9 and 11':
+                counter = counter + 1
+                file_select = not file_select
+                print('number of times rebooted is: ', counter)
+                file.write('number of times rebooted is: ')
+                file.write(str(counter))
+                file.write('\nsecond sequence complete.\n')
+            else:
+                print('ERROR DETECTED', result)
+                file.write('ERROR DETECTED ')
+                file.write(str(result))
+                file.write('\n')
+                break
+            file_select = not file_select
+            loop_end_time = int(round(time.time()))
+            print('loop time is: ', (loop_end_time - loop_start_time), 'seconds')
+            print('total program time is: ', (loop_end_time - start_time), 'seconds') #uses the loop time since this is the latest time that has passes to avoid using a redundant variable.
+            file.write('loop time is: ')
+            file.write(str(loop_end_time - loop_start_time))
+            file.write('seconds\n')
+            current_time = datetime.datetime.now().time()
+            print('end time of entire while loop iteration is: ',str(current_time.isoformat()))
+        print('GOT HERE !!!\n')
+        print(counter)
+        file.write('Number of times rebooted is: ')
+        file.write(str(counter))
+        file.write('\n')
+        file.close()
+
+      </code>
+    </pre>
+  </div>
+
+  <script src="js/shCore.js"></script>
+  <script src="js/shBrushCpp.js"></script>
+  <script>
+    SyntaxHighlighter.all()
+  </script>
+  <script src="js/Ariel_Site.js"></script>
+</body>
+</html>

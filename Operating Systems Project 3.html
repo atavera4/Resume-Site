@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link href="css/bootstrap-theme.css" rel="stylesheet">
+  <link href="css/bootstrap.css"  rel="stylesheet">
+  <link href="css/shCore.css" rel="stylesheet" type="text/css" />
+  <link href="css/shThemeDefault.css" rel="stylesheet" type="text/css" />
+  <link href="css/site.css" rel="stylesheet">
+  <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js?autoload=true&amp;skin=sunburst&amp;lang=css" defer="defer"></script>
+
+
+</head>
+
+<body class="BodyBackground1 " onload="prettyPrint()">
+  <div id="Main" class="container TransparentBackgroundBlack">
+  <div class="Description-font">
+    <p>
+      <pre>
+
+        This is the 3rd project done for the Operating systems course.
+        The objective here was to
+
+        The following C++ code is the program that I wrote to complete the task.
+
+
+        Create the following program consisting of 1 main process (your main program) with n threads:
+	The main thread:
+    a.	Computes the product (often called the cross-product) of two matrices, which are at least 3 by 3, by using multiple threads to do the actual computations concurrently.
+    b.	Allocates space for the input matrices.
+    c.	Allocates space for the threads to insert the values for the resulting matrix in dynamic storage (size determined at execution time, dependant on input matrices, when the data is input).  This is the output matrix
+    d.	Waits for all 'n' threads to complete.  You may use any method to detect when they are all complete.
+    e.	Prints out the resulting matrix in rows and columns
+	Other Threads:
+    a.	Access the shared memory and compute a set of results into the output matrix in shared memory, the address of which is initially set up by the main Process.  The main Process will accept these results for final printout.
+    b.	Each thread uses shared memory to access its own portion of the input matrices (there must be an indicator as to their size).
+    c.	Terminates after computing its own portion of the solution.
+
+      </pre>
+    </p>
+  </div>
+
+  <pre class="prettyprint" id="quine" style="border:4px solid #88c">
+    <code>
+      //
+      //  OSproject3_final.cpp
+      //
+      //
+      //  Created by Ariel Taveras on 10/20/15.
+      //
+      //
+      #include "stdafx.h"
+      #include <stdio.h>
+      #include <stdlib.h>
+      #include <iostream>
+      #include <string.h>
+      #include <fstream>
+      #include <pthread.h>
+      #include "time_functions.h"
+      using namespace std;
+
+      //This structure contains all of the information that is to be shared amounst every function and thread created.
+      typedef struct THREAD_PARAM {
+
+      	int size_of_matrix_1_row;
+      	int size_of_matrix_1_column;
+      	int size_of_matrix_2_row;
+      	int size_of_matrix_2_column;
+
+      	char** input_matrix_1;
+      	char** input_matrix_2;
+      	int** output_matrix;
+
+      	int row;
+      	int column;
+      	int position;
+      	int product;
+
+      }THREAD_PARAM;
+
+      //This function initializes all values in the shared memory data structure
+      void InitializeSharedMemory(THREAD_PARAM* shared_memory);
+
+      //This function counts the rows and columns of the 2 Matrices.
+      void CountMatrix(string file_name, THREAD_PARAM* shared_memory);
+
+      //This Function Allocates the necessary memory space for the 2 Matrices.
+      void AllocateMemoryFor2dArrays(THREAD_PARAM* shr_mem);
+
+      //This Function fills the input matrices with the values obtained from the input file
+      void FillMatrixesWithValues(string file_name, THREAD_PARAM* shared_memory);
+
+      //This function Takes the values from the 2 Matrices and passes them into a thread that will comput the product.
+      void ComputeOutputMatrix(string file_in, string file_out, THREAD_PARAM* shared_memory);
+
+      //This is the thread functions used to comput each individual product.
+      void* ThreadMultiplication(void* shr_mem);
+
+      //This function is used in the ComputeOutput Matrix function to add up the appropriate products computed by each of the threads and place them in the output matrix.
+      void AddtheProducts(int product_list[], THREAD_PARAM* shared_memory);
+
+      //This function print the ouput matrix values onto the console and into an output file.
+      void PrintOutput(string file_out, THREAD_PARAM* shared_memory);
+
+
+      int main()
+      {
+      	char fullfilepath_in[30];
+      	char fullfilepath_out[30];
+      	char thisprojectfile_in[13];
+      	char thisprojectfile_out[14];
+      	strcpy(thisprojectfile_in, "project3_in.txt");
+      	strcpy(thisprojectfile_out, "project3_out.txt");
+
+      	strcpy(fullfilepath_in, filebase); // copy filebase from time_functions.h into fullfilepath
+      	strcpy(fullfilepath_out, filebase);
+      	strcat(fullfilepath_in, thisprojectfile_in); // combine path and name
+      	strcat(fullfilepath_out, thisprojectfile_out);
+
+      	//Convert the char arrays into strings.
+      	string file_in = string(fullfilepath_in);
+      	string file_out = string(fullfilepath_out);
+
+      	//string file_in = "inputfile.txt";
+      	//string file_out = "outputfile.txt";
+
+      	// Create a structure containing the pointers to the 2 input 2d arrays
+      	THREAD_PARAM shared_memory;
+      	InitializeSharedMemory(&shared_memory);
+
+      	CountMatrix(file_in, &shared_memory);
+
+      	cout << "Row Size of 1st Matrix is: " << shared_memory.size_of_matrix_1_row << endl;
+      	cout << "Column Size of 2nd Matrix is: " << shared_memory.size_of_matrix_1_column << endl;
+      	cout << "Row Size of 2nd Matrix is:: " << shared_memory.size_of_matrix_2_row << endl;
+      	cout << "Column Size of 2nd Matrix is: " << shared_memory.size_of_matrix_2_column << endl;
+
+      	AllocateMemoryFor2dArrays(&shared_memory); //create the 2d arrays for the input matrixes.
+
+      	FillMatrixesWithValues(file_in, &shared_memory);
+
+      	ComputeOutputMatrix(file_in, file_out, &shared_memory);
+
+      	PrintOutput(file_out, &shared_memory);
+
+      	return 0;
+      }
+
+      void PrintOutput(string file_path, THREAD_PARAM* shared_memory)
+      {
+      	fstream output_file;
+      	output_file.open(file_path);
+      	int t;
+      	int h;
+      	for (t = 0; t < shared_memory->size_of_matrix_1_row; t++)
+      	{
+      		for (h = 0; h < shared_memory->size_of_matrix_2_column; h++)
+      		{
+      			cout << "Matrix output is: " << "row " << t + 1 << " column " << h + 1 << " == " << shared_memory->output_matrix[t][h] << endl;
+      			output_file << "Matrix output is: " << "row " << t + 1 << " column " << h + 1 << " == " << shared_memory->output_matrix[t][h] << endl;
+      		}
+      	}
+      	return;
+      }
+
+      void AddtheProducts(int product_list[], THREAD_PARAM* shared_memory)
+      {
+      	int product_sum_tracker = 0;
+      	int product_sum = 0;
+      	int g = 0;
+      	int h = 0;
+      	int j = 0;
+      	for (g = 0; g < shared_memory->size_of_matrix_1_row; g++)
+      	{
+      		for (h = 0; h < shared_memory->size_of_matrix_2_column; h++)
+      		{
+      			for (j = 0; j < shared_memory->size_of_matrix_1_column; j++)
+      			{
+      				product_sum += product_list[j + product_sum_tracker];
+      				shared_memory->output_matrix[g][h] = product_sum;
+      			}
+      			product_sum = 0;
+      			product_sum_tracker += j;
+      		}
+      	}
+      }
+
+      void* ThreadMultiplication(void* shr_mem)
+      {
+      	int product = 0;
+      	THREAD_PARAM *shared_memory = static_cast<THREAD_PARAM*>(shr_mem);
+      	product = (shared_memory->input_matrix_1[shared_memory->row][shared_memory->position] - '0') * (shared_memory->input_matrix_2[shared_memory->position][shared_memory->column] - '0');
+      	// add result to a sum in structure
+      	shared_memory->product = product;
+      	//cout << shared_memory->input_matrix_1[shared_memory->row][shared_memory->position] << "  " << shared_memory->input_matrix_2[shared_memory->position][shared_memory->column] << endl;
+      	return (void*)product;
+      }
+
+      void ComputeOutputMatrix(string file_in, string file_out, THREAD_PARAM* shared_memory)
+      {
+      	int g = 0;
+      	int row = 0;
+      	int column = 0;
+      	int position = 0;
+      	int num_of_products_count = 0;
+      	void* product;
+      	pthread_t multiply;
+
+      	//create new structure array pointer for memcpy.
+      	int total_num_of_products = shared_memory->size_of_matrix_2_row *shared_memory->size_of_matrix_1_row * shared_memory->size_of_matrix_2_column;
+      	THREAD_PARAM array[40];
+      	int product_list[40];
+
+      	for (g = 0; g < total_num_of_products; g++)
+      	{
+      		memcpy(&array[g], shared_memory, sizeof(THREAD_PARAM));
+      	}
+
+      	for (row = 0; row < shared_memory->size_of_matrix_1_row; row++) // row of Matrix 1
+      	{
+      		for (column = 0; column < shared_memory->size_of_matrix_2_column; column++) //Column of matrix 2
+      		{
+      			for (position = 0; position < shared_memory->size_of_matrix_1_column; position++)// Position on both matrix
+      			{
+      				array[num_of_products_count].row = row;
+      				array[num_of_products_count].column = column;
+      				array[num_of_products_count].position = position;
+      				pthread_create(&multiply, NULL, ThreadMultiplication, (void*)&array[num_of_products_count]);
+      				pthread_join(multiply, &product);
+      				product_list[num_of_products_count] = array[num_of_products_count].product;
+      				num_of_products_count++;
+      			}
+      		}
+      	}
+
+      	AddtheProducts(product_list, shared_memory);
+      	return;
+      }
+
+      void FillMatrixesWithValues(string file_name, THREAD_PARAM* shared_memory)
+      {
+      	fstream input_file;
+      	input_file.open(file_name);
+      	char character = '0';
+
+      	//Fill the 1st 2d array.
+      	int row = 0; int column = 0;
+      	while (true)
+      	{
+      		character = input_file.get();
+      		if (character == '\n')
+      		{
+      			row++;
+      			column = 0;
+      			//if (input_file.get() == '*'){ break; }
+      			//if (row >= (shared_memory->size_of_matrix_1_row-1)){character = input_file.get(); break; }
+      			//else { column = 0; }
+      		}
+      		else if (character == '*') { row--; break; }
+      		else if (character != ' ')
+      		{
+      			shared_memory->input_matrix_1[row][column] = character;
+      			//cout << shared_memory->input_matrix_1[row][column] << endl;
+      			column++;
+      		}
+      		else { ; } // NO OPERATION
+
+      	}
+
+      	//Skip the rest of the *'s
+      	while (character == '*')
+      	{
+      		character = input_file.get();
+      	}
+
+      	//Fill the 2nd 2d array
+      	row = -1; column = 0;
+      	while (true)
+      	{
+      		if (character == '\n')
+      		{
+      			row++;
+      			column = 0;
+      		}
+      		else if (input_file.eof() == true) { row--; break; }
+      		else if (character != ' ')
+      		{
+      			//cout << row <<" <row col> " << column  << endl;
+      			shared_memory->input_matrix_2[row][column] = character;
+      			//cout << shared_memory->input_matrix_2[row][column] << endl;
+
+      			column++;
+      		}
+      		character = input_file.get();
+      	}
+      	return;
+      }
+
+      void AllocateMemoryFor2dArrays(THREAD_PARAM* shared_memory)
+      {
+      	//INPUT MATRIX #1
+      	int col = 0;
+      	shared_memory->input_matrix_1 = (char**)malloc(sizeof(char) * shared_memory->size_of_matrix_1_row);
+      	for (col = 0; col < shared_memory->size_of_matrix_1_row; col++)
+      	{
+      		shared_memory->input_matrix_1[col] = (char*)malloc(sizeof(char) * shared_memory->size_of_matrix_1_column);
+      	}
+      	//INPUT MATRIX #2
+      	col = 0;
+      	shared_memory->input_matrix_2 = (char**)malloc(sizeof(char) * 4);//shared_memory->size_of_matrix_2_row);
+      	for (col = 0; col < 4; col++)
+      	{
+      		shared_memory->input_matrix_2[col] = (char*)malloc(sizeof(char) * shared_memory->size_of_matrix_2_column);
+      	}
+      	//OUTPUT MATRIX. Will have to same dimensions as the input_matrix_1 2d array.
+      	col = 0;
+      	shared_memory->output_matrix = (int**)malloc(sizeof(int) * shared_memory->size_of_matrix_1_row);
+      	for (col = 0; col < shared_memory->size_of_matrix_1_row; col++)
+      	{
+      		shared_memory->output_matrix[col] = (int*)malloc(sizeof(int) * shared_memory->size_of_matrix_1_column);
+      	}
+      	return;
+      }
+
+      //Init everything to 0;
+      void InitializeSharedMemory(THREAD_PARAM* shared_memory)
+      {
+      	shared_memory->size_of_matrix_1_row = 0;
+      	shared_memory->size_of_matrix_1_column = 0;
+      	shared_memory->size_of_matrix_2_row = 0;
+      	shared_memory->size_of_matrix_2_column = 0;
+      	shared_memory->row = 0;
+      	shared_memory->column = 0;
+      	shared_memory->position = 0;
+      	shared_memory->product = 0;
+
+      	return;
+      }
+
+      //Counts the elements in the 2 input Matrices.
+      void CountMatrix(string file_name, THREAD_PARAM* shared_memory)
+      {
+      	fstream input_file;
+      	input_file.open(file_name);
+      	char character = '0';
+      	while (true)
+      	{
+      		character = input_file.get();
+      		if (character == '\n')
+      		{
+      			shared_memory->size_of_matrix_1_row++;
+      			if (input_file.get() == '*') { shared_memory->size_of_matrix_1_column++; break; }
+      			else { shared_memory->size_of_matrix_1_column = 0; }
+      		}
+      		else if (character != ' ') { shared_memory->size_of_matrix_1_column++; }
+
+      	}
+      	//skip the rest of the line with the *'s
+      	while (character == '*')
+      	{
+      		character = input_file.get();
+      	}
+      	//count the 2nd matrix
+      	while (true)
+      	{
+      		if (character == '\n')
+      		{
+      			shared_memory->size_of_matrix_2_row++;
+      			shared_memory->size_of_matrix_2_column = 0;
+      		}
+      		else if (input_file.eof() == true) { break; }
+      		else if (character != ' ') { shared_memory->size_of_matrix_2_column++; }
+      		else { ; } // no-op.
+      		character = input_file.get();
+
+      	}
+      	shared_memory->size_of_matrix_2_row--;
+      }
+
+
+
+    </code>
+  </pre>
+</div>
+
+
+
+  <script src="js/shCore.js"></script>
+  <script src="js/shBrushCpp.js"></script>
+  <script>
+    SyntaxHighlighter.all()
+  </script>
+  <script src="js/Ariel_Site.js"></script>
+</body>
+</html>

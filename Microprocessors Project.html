@@ -1,0 +1,2016 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script type="text/javascript" src="js/jQuery.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Roboto:100italic' rel='stylesheet' type='text/css'>
+  <link href="css/bootstrap-theme.css" rel="stylesheet">
+  <link href="css/bootstrap.css"  rel="stylesheet">
+  <link href="css/site.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lato:100,300' rel='stylesheet' type='text/css'>
+  <title> My Site </title>
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <script type="text/javascript" src="js/jQuery.js"></script>
+  <script type="text/javascript" src="js/bootstrap.min.js"></script>
+  <link href="css/site.css" rel="stylesheet">
+
+  <script src="https://www.google.com/uds/api?file=uds.js&v=1.0&key=YOURKEYHERE" type="text/javascript"></script>
+  <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js?autoload=true&amp;skin=sunburst&amp;lang=css" defer="defer"></script>
+
+
+</head>
+
+<body class="BodyBackground1 " onload="prettyPrint()">
+  <div id="Main" class="container TransparentBackgroundBlack">
+
+    <div class="row Description-font">
+      <p>
+        <pre>
+
+          This project consisted of
+
+        </pre>
+      </p>
+    </div>
+
+  <div class="row">
+
+    <a class= "col-md-12 Font-Ariel2" id="button1" href="#">Show/Hide "Main.c"  File</a>
+
+    <pre class="prettyprint" id="code_1" style="border:4px solid #88c">
+      <code >
+        /* Line Follower Project - an application for the Pololu 3pi Robot
+         *
+         *
+         * Created: 12/18/2015 3:49:06 PM
+         *  Author: Ariel
+         */
+
+        // NEW MAIN
+        #include "main.h"
+
+        int main()
+        {
+          InitializeBuzzer();
+          startSound(60, 50);
+
+          ConfigureRobot();
+
+          print_hex(minimum_brightness);
+          _delay_ms(4000);
+
+          bool sensor_readings[5];
+          while(1)
+          {
+            GetSensorValue(right_most_sensor);
+            GetSensorValue(right_of_middle_sensor);
+            GetSensorValue(middle_sensor);
+            GetSensorValue(left_of_middle_sensor);
+            GetSensorValue(left_most_sensor);
+
+            // Compare to the previously set minimum line brightness value.
+            sensor_readings[0] = CompareSensorValue(right_most_sensor);
+            sensor_readings[1] = CompareSensorValue(right_of_middle_sensor);
+            sensor_readings[2] = CompareSensorValue(middle_sensor);
+            sensor_readings[3] = CompareSensorValue(left_of_middle_sensor);
+            sensor_readings[4] = CompareSensorValue(left_most_sensor);
+
+            //print_hex(color_sensor3);
+
+            if(Case_mode)
+            {
+               Steering(true, sensor_readings);
+            }
+
+            else if (PID_mode)
+            {
+               GetMeasuredPosition(sensor_readings);
+               PID_Controller(Duty_Cycle, sensor_readings);
+            }
+
+            else if (Hybrid_mode)
+            {
+              GetMeasuredPosition(sensor_readings);
+              PID_Controller(Duty_Cycle, sensor_readings);
+              Steering(true, sensor_readings );
+            }
+
+            else{ ; }
+          }
+          return 0;
+        }
+
+        void ConfigureRobot()
+        {
+          configure_push_button_array();
+          InitializePID();
+          Set_K_values();
+          SetBaseSpeed(); //Set base Duty Cycle.
+          SelectMode();
+
+          GetInitialMinumumBrightnessValue();
+          configure_left_motor();
+          configure_right_motor();
+
+        }
+        void Set_K_values()
+        {
+
+          SetKpValue();
+          SetKdValue();
+          SetKiValue();
+
+          return;
+        }
+
+        void SelectMode()
+        {
+          clear();
+          print("start");
+          _delay_ms(500);
+          while(1)
+          {
+            if(!left_button_is_presed())
+            {
+              Case_mode = true;
+              clear;
+              break;
+              } else {Case_mode = false; }
+
+              if (!middle_button_is_pressed())
+              {
+                PID_mode = true;
+                clear();
+                break;
+                } else {PID_mode = false; }
+
+                if(!right_button_is_pressed())
+                {
+                  Hybrid_mode = true;
+                  clear();
+                  break;
+                }
+                else { Hybrid_mode = false; }
+              }
+          return;
+        }
+
+        void SetBaseSpeed()
+        {
+          // 25 % pwm
+          print(("Enter Speed"));
+          uint8_t incr = 0x00;
+
+          while(1)
+          {
+
+            if(!left_button_is_presed())
+            {
+              clear();
+              Duty_Cycle = 55;
+              print_hex_byte(0x25);
+              _delay_ms(1000);
+              clear();
+              break;
+            }
+            if(!middle_button_is_pressed())
+            {
+              clear();
+              Duty_Cycle = 80;
+              print_hex_byte(0x55);
+              _delay_ms(1000);
+              clear();
+              break;
+            }
+            if(!right_button_is_pressed())
+            {
+              clear();
+              Duty_Cycle = 127;
+              print_hex_byte(0x80);
+              _delay_ms(1000);
+              clear();
+              break;
+            }
+          }
+
+          return;
+        }
+      </code>
+    </pre>
+  </div>
+
+
+  <div class="row">
+
+    <a class="col-md-12 Font-Ariel2" id="button2" href="#">Show/Hide "Main.h" File</a>
+    <pre class="prettyprint" id="code_2" style="border:4px solid #88c">
+      /*
+       * main.h
+       *
+       * Created: 12/18/2015 8:47:40 PM
+       *  Author: Ariel
+       */
+
+
+      #ifndef MAIN_H_
+      #define MAIN_H_
+
+
+      //#include <stdbool.h>
+      #define F_CPU 20000000  // system clock is 20 MHz
+      #include <util/delay.h>  // uses F_CPU to achieve us and ms delays
+      #include <pololu/3pi.h>
+      #include "SensorCalibration.h"
+      #include "PID Control.h"
+      #include "Buttons.h"
+      #include "Buzzer.h"
+
+
+      bool Case_mode;
+      bool PID_mode;
+      bool Hybrid_mode;
+
+      uint8_t Duty_Cycle;
+
+      void ConfigureRobot();
+
+      void Set_K_values();
+      void SetBaseSpeed();
+      void SelectMode();
+
+
+
+      #endif /* MAIN_H_ */
+
+    </pre>
+  </div>
+
+  <div class="row">
+    <a class="col-md-12 Font-Ariel2" id="button3" href="#">Show/Hide LCD_display.c </a>
+    <pre class="prettyprint" id="code_3" style="border:4px solid #88c">
+      /*
+       * LCD_display.c
+       *
+       * Created: 12/24/2015 2:30:40 PM
+       *  Author: Ariel
+       */
+
+      //
+      //  Motor_Drivers.c
+      //
+      //
+      //  Created by Ariel Taveras on 10/12/15.
+      //
+      //
+
+      #include <avr/io.h>
+      #include <stdbool.h>
+      //#include <stdlib.h>
+      #include <util/delay.h>
+      //#define F_CPU 20000000UL
+
+
+      int main()
+      {
+      	char *left_button_state = malloc(sizeof(char)*2);
+      	char *right_button_state = malloc(sizeof(char)*2);
+      	char *middle_button_state = malloc(sizeof(char)*2);
+      	//configure_left_motor();
+      	//configure_right_motor();
+      	//configure_push_button_array();
+      	bool result = false;
+
+      	initialize_LCD_driver();
+      	unsigned char first_name[5] = {'A','r','i','e','l'};
+      	unsigned char last_name[7] = {'T','a','v','e','r','a','s'};
+      	unsigned char character = 'Y';
+
+
+      	//putchar(first_name[4]);
+
+      	puts(first_name, 5);
+      	_delay_ms(50000);
+      	lcd_erase();
+      	puts(last_name,7);
+      	while(1); {}
+      	return 0;
+      }
+
+      // LCD FUNCTIONS
+
+      void initialize_LCD_driver()
+      {       //this is the initialization sequence recommended in datasheet
+
+      	lcdTimeout = 10000;
+      	LCD_control_RS_PORT &= ~(1 << LCD_control_RS_location);  //RS=0
+      	LCD_control_RW_PORT &= ~(1 << LCD_control_RW_location);  //RW=0
+      	LCD_control_E_PORT &= ~(1 << LCD_control_E_location);    //E=0
+
+      	LCD_control_RS_DDR |= (1 << LCD_control_RS_location);  //set RS to output
+      	LCD_control_RW_DDR |= (1 << LCD_control_RW_location);  //set RW to output
+      	LCD_control_E_DDR |= (1 << LCD_control_E_location);    //set E to output
+
+      	_delay_ms(30);
+      	//Set_Data_Bus(true); //set data bus to output (write)
+      	//LCD_control_RW_PORT |= (1 << LCD_control_RW_location);
+
+      	//_delay_ms(15);   //delay 15 ms
+      	write_register(0x3, 0, 1);  //output nibble 0x3
+      	_delay_ms(6);   //delay 6 ms
+      	write_register(0x3, 0, 1);  //output nibble 0x3
+      	_delay_ms(2);   //delay 2ms
+      	write_register(0x3, 0, 1);  //output nibble 0x3
+      	_delay_ms(2); //delay 2 ms
+      	write_register(0x2, 0, 1);  //output nibble 0x2
+      	_delay_ms(2); //delay 2 ms
+
+
+      	//busywait();   //poll Busy Flag until 0
+      	write_register(0x28, 0, 2);  //send the command 0x28
+      	write_register(0x08, 0, 2);  //send the command 0x08
+      	write_register(0x01, 0, 2);  //send the command 0x01
+      	write_register(0x06, 0, 2);  //send the command 0x06
+      	write_register(0x0C, 0, 2); // display on
+      }
+
+      void Set_Data_Bus(bool setting_data_bus)// V
+      {
+
+      	if (setting_data_bus)
+      	{
+      		LCD_data_DDR_B4toB6 |= (1 << LCD_data_location_B1) | (1 << LCD_data_location_B4) | (1 << LCD_data_location_B5);
+      		LCD_data_DDR_D7 |= (1 << LCD_data_location_D7);
+      	}
+      	else
+      	{
+      		LCD_data_DDR_B4toB6 &= ~(1 << LCD_data_location_B1);
+      		LCD_data_DDR_B4toB6 &= ~(1 << LCD_data_location_B4);
+      		LCD_data_DDR_B4toB6 &= ~(1 << LCD_data_location_B5);
+      		LCD_data_DDR_D7 &= ~(1 << LCD_data_location_D7);
+      	}
+      	return;
+      }
+
+
+      /*void lcd_goto_xy( uint8_t row, uint8_t col) //sets the cursor to row,col
+      {
+      	Set_Data_Bus(true);
+
+      	//Clears the display and sets cursor to 0;
+      	//write_register(0x01, 0);
+
+      	uint8_t coordinate[] = {0x80, 0xC0, 0x94, 0xD4}; // 0x00, 0x40 ....etc + / SINCE PD7 has to be 1.
+
+      	write_register(coordinate[row] + col, 0, 2);
+
+      	return;
+      }*/
+
+      void lcd_erase() //erases the LCD display   //V
+      {
+      	Set_Data_Bus(true);
+
+      	//Clears the display and sets cursor to 0;
+      	write_register(0x01, 0, 2);
+
+      	return;
+      }
+
+      void putchar( unsigned char x) //displays the character 'x' at the current cursor
+      {
+      	// set command to increment cursor after /read/write operation
+      	//write_register(0x06, 0);
+      	//write x to LCD
+      	write_register(x, 1,2);
+
+      	return;
+      }
+
+      void puts( unsigned char str[], int length)  // displays the string str at the current cursor position
+      {
+      	int count;
+      	for(count=0; count < length; count++)
+      	{
+      		putchar(str[count]);
+      	}
+      	return;
+      }
+
+      static uint8_t pulse_E()//V
+      {
+      	uint8_t data;
+
+      	_delay_ms(1);
+      	//E=1
+      	LCD_control_E_PORT |= (1 << LCD_control_E_location);
+
+      	//delay for 1ms
+      	_delay_ms(1);
+
+      	data = PIND;
+
+      	//E=0
+      	LCD_control_E_PORT &= ~(1 << LCD_control_E_location);
+      	_delay_ms(1);
+      	return data;
+      }
+
+      uint8_t read_register( bool reg )
+      {
+      	uint8_t data;
+      	//RS = reg
+      	LCD_control_RS_PORT &= ~(1<< LCD_control_RS_location);
+
+      	if(reg)
+      	{
+      		LCD_control_RS_PORT |= (1 << LCD_control_RS_location);
+      	}
+      	else
+      	{
+      		LCD_control_RS_PORT &= ~(1 << LCD_control_RS_location);
+      	}
+      	//set data bus direction to input
+      	LCD_control_E_DDR &= ~(1 << LCD_control_E_location);
+
+      	//RW=1
+      	LCD_control_RW_PORT |= (1 << LCD_control_RW_location);
+
+      	//call pulse_E twice, assemble nibbles, and return byte
+      	data = pulse_E();
+      	data |= (pulse_E() << 4); // 10000000
+
+      	return data;
+      }
+
+
+      static void busywait()// V
+      {
+      	//set data bus direction to input
+      	LCD_control_E_DDR &= ~(1 << LCD_data_location_D7);
+
+      	LCD_control_RS_PORT &= ~(1 << LCD_control_RS_location); // set to cmd mode
+      	LCD_control_RW_PORT |= (1 << LCD_control_RW_location); // set to read mode
+
+      	//Read data for busy flag
+      	uint8_t data;
+
+      	//repeatedly read command register until busy flag is 0
+      	while(true)
+      	{
+      		// read_register(0);
+      		data = pulse_E();
+      		 pulse_E();
+      		// is cmd resister just D7 on PORTD
+      		if((data & (1 << 7)) == 0x00) { break; }
+
+      	}
+      	return;
+      }
+
+      static void nibble_out(uint8_t data) //V
+      {
+
+      	uint8_t PORTB_mask = (1 << LCD_data_location_B1) | (1 << LCD_data_location_B4) | (1 << LCD_data_location_B5);
+      	uint8_t PORTD_mask = (1 << LCD_data_location_D7);
+      	uint8_t masked_PORTB_value = (((data & 0x01) <<1 ) | ((data & 0x06) << 3));
+      	uint8_t masked_PORTD_value = ((data & 0x08) << 4);
+      	PORTB = (PORTB & ~PORTB_mask) | masked_PORTB_value;
+      	PORTD = (PORTD & ~PORTD_mask) | masked_PORTD_value;
+
+      	pulse_E();
+
+      }
+
+      static void write_register(uint8_t data, uint8_t rs, uint8_t num_of_nibbles) // V
+      {
+      	/*
+      	Set_Data_Bus(true); //set data bus direction to output
+      	nibble_out(data >> 4);//call nibble_out for upper nibble of data
+      	nibble_out(data & 0x0F); //call nibble out for lower nibble of data*/
+
+      	busywait();
+      	// Clear RW and set or clear RS based on the rs argument
+      	//LCD_control_RW_PORT &= ~(1 << 0);
+      	LCD_control_RW_PORT &= ~(1 << LCD_control_RW_location); //RW=0
+      	if (rs)
+      	//LCD_control_RS_PORT |= 1 << 2;
+      	LCD_control_RS_PORT |= (1 << LCD_control_RS_location);
+      	else
+      	//LCD_control_RS_PORT &= ~(1 << 2);
+      	LCD_control_RS_PORT &= ~(1 << LCD_control_RS_location);
+
+      	// Set the data pins as outputs
+      	Set_Data_Bus(true);
+
+      	if(num_of_nibbles == 2)
+      	{
+      	nibble_out(data >> 4);
+      	}
+      	nibble_out(data & 0x0F);
+
+      	return;
+      }
+
+    </pre>
+  </div>
+
+  <div class="row">
+    <a class="col-md-12 Font-Ariel2" id="button4" href="#">Show/Hide LCD_dislay.h </a>
+    <pre class="prettyprint" id="code_4" style="border:4px solid #88c">
+      /*
+       * LCD_display.h
+       *
+       * Created: 12/24/2015 2:31:32 PM
+       *  Author: Ariel
+       */
+
+
+      //#ifndef LCD_DISPLAY_H_
+      //#define LCD_DISPLAY_H_
+
+
+      //pre-processor definitions for the LCD Display
+      #define LCD_control_RS_DDR DDRD
+      #define LCD_control_RS_PORT PORTD
+      #define LCD_control_RS_location 2
+
+      #define LCD_control_RW_DDR DDRB
+      #define LCD_control_RW_PORT PORTB
+      #define LCD_control_RW_location 0
+
+      #define LCD_control_E_DDR DDRD
+      #define LCD_control_E_PORT PORTD
+      #define LCD_control_E_location 4
+
+      #define LCD_data_DDR_B4toB6 DDRB
+      #define LCD_data_DDR_D7 DDRD
+      #define LCD_data_location_B1 1
+      #define LCD_data_location_B4 4
+      #define LCD_data_location_B5 5
+      #define LCD_data_PORT_B4toB6 PORTB
+      #define LCD_data_PORT_D7 PORTD
+      #define LCD_data_location_D7 7
+
+      #define LCD_data_PIN_B4toB6 PINB
+      #define LCD_data_PIN_D7 PIND
+
+      #define BUSY_FLAG (1<<7)
+      #define Busy_Flag_DDR DDRD
+      #define Busy_Flag_PORT PORTD
+      #define Busy_Flag_PIN PIND
+
+      //LCD FUNCTIONS
+      static void write_register(uint8_t data, uint8_t rs, uint8_t num_of_nibbles);
+      void Set_Data_Bus(bool setting_data_bus);
+      //void lcd_goto_xy( uint8_t row, uint8_t col);
+      void lcd_erase();
+      void putchar( unsigned char x);
+      void puts( unsigned char  str[], int length);
+      void initialize_LCD_driver();
+      static uint8_t pulse_E();
+      static uint8_t read_register( bool reg );
+      static void busywait();
+      static void nibble_out(uint8_t data);
+
+      void sendData(unsigned char data);
+      void send(unsigned char data, unsigned char rs, unsigned char numSends);
+      //void print(char character);
+      void busyWait();
+      void initialize_2();
+      unsigned long lcdTimeout;
+
+      void send_cmd(unsigned char cmd);
+      void send_4bit_cmd(unsigned char cmd);
+
+
+
+      //#endif /* LCD_DISPLAY_H_ */
+
+    </pre>
+  </div>
+
+  <div class="row">
+    <a class="col-md-12 Font-Ariel2" id="button5" href="#">Show/Hide Buttons.c </a>
+    <pre class="prettyprint" id="code_5" style="border:4px solid #88c">
+
+      /*
+       * Buttons.c
+       *
+       * Created: 12/22/2015 4:57:02 AM
+       *  Author: Ariel
+       */
+
+      #include "Buttons.h"
+
+      void configure_push_button_array()
+      {
+      	DDRB &= (0 << LEFT_BUTTON_LOCATION);
+      	DDRB &= (0 << MIDDLE_BUTTON_LOCATION);
+      	DDRB &= (0 << RIGHT_BUTTON_LOCATION);
+      	return;
+      }
+
+      bool left_button_is_presed()
+      {
+      	uint8_t extract_info_left_button = 0x00;
+      	extract_info_left_button |= (1 << LEFT_BUTTON_LOCATION);
+      	uint8_t current_state_of_left_button = LEFT_BUTTON &= extract_info_left_button;
+
+      	if(current_state_of_left_button)
+      	{
+
+      		return true;
+      	}
+      	else
+      	{
+
+      		return false;
+      	}
+      }
+
+      bool right_button_is_pressed()
+      {
+      	uint8_t extract_info_right_button = 0x00;
+      	extract_info_right_button |= (1 << RIGHT_BUTTON_LOCATION);
+      	uint8_t current_state_of_right_button = RIGHT_BUTTON &= extract_info_right_button;
+      	if (current_state_of_right_button)
+      	{
+
+      		return true;
+      	}
+      	else
+      	{
+
+      		return false;
+      	}
+      }
+
+      bool middle_button_is_pressed()
+      {
+      	uint8_t extract_info_middle_button = 0x00;
+      	extract_info_middle_button |= (1 << MIDDLE_BUTTON_LOCATION);
+      	uint8_t current_state_of_middle_button = MIDDLE_BUTTON & extract_info_middle_button;
+      	if (current_state_of_middle_button)
+      	{
+
+      		return true;
+      	}
+      	else
+      	{
+
+      		return false;
+      	}
+      }
+
+    </pre>
+  </div>
+
+
+  <div class="row">
+    <a class="col-md-12 Font-Ariel2" id="button6" href="#">Show/Hide Buttons.h</a>
+    <pre class="prettyprint" id="code_6" style="border:4px solid #88c">
+
+      /*
+       * Buttons.h
+       *
+       * Created: 12/22/2015 4:57:21 AM
+       *  Author: Ariel
+       */
+
+      #include <stdbool.h>
+      #include <avr/io.h>
+
+      #define LEFT_BUTTON_PIN B
+      #define LEFT_BUTTON PINB
+      #define LEFT_BUTTON_LOCATION 1
+
+      #define RIGHT_BUTTON_PIN B
+      #define RIGHT_BUTTON PINB
+      #define RIGHT_BUTTON_LOCATION 5
+
+      #define MIDDLE_BUTTON_PIN B
+      #define MIDDLE_BUTTON PINB
+      #define MIDDLE_BUTTON_LOCATION 4
+
+
+      void configure_push_button_array();
+      bool left_button_is_presed();
+      bool right_button_is_pressed();
+      bool middle_button_is_pressed();
+
+    </pre>
+  </div>
+
+
+
+  <div class="row">
+    <a class="col-md-12 Font-Ariel2" id="button7" href="#">Show/Hide SensorCalibration.c </a>
+    <pre class="prettyprint" id="code_7" style="border:4px solid #88c">
+
+
+
+      //Sensor Calibration
+
+      #include <pololu/3pi.h>
+      #include <avr/io.h>
+      //#include "QTR_Sensors.h"
+      //#define F_CPU 20000000  // system clock is 20 MHz
+      #include <util/delay.h>  // uses F_CPU to achieve us and ms delays
+      //#include "SensorCalibration.h"
+      #include "main.h"
+
+      void Turn_on_Sensors()
+      {
+      	ConfigureQtrPinAsInput(1,1,1,1,1);
+      	SetQtrPinHigh(1,1,1,1,1);
+      	_delay_us(10);
+      	return;
+      }
+
+      void GetInitialMinumumBrightnessValue()
+      {
+
+      	GetSensorValue(right_most_sensor);
+      	GetSensorValue(right_of_middle_sensor);
+      	GetSensorValue(middle_sensor);
+      	GetSensorValue(left_of_middle_sensor);
+      	GetSensorValue(left_most_sensor);
+
+      	/*
+      	// Sensor Fusion.
+
+      	uint32_t average;
+      	uint32_t average_sqrd;
+      	uint32_t variance;
+      	*/
+
+      	minimum_brightness = brightness_value_sensor3;
+      }
+
+      uint32_t GetSensorValue(uint8_t sensor)
+      {
+      	// Turn LED on DDR = 0 PORT = 1.
+      	Turn_on_Sensors();
+      	uint32_t brightness = 0;
+      	uint32_t max_threshold = 0xFFFE;
+      	uint8_t sensor_select = sensor ;
+
+      	//set sensor as output
+      	ConfigureQtrPinAsOutput(1,1,1,1,1);
+
+      	// charge sensor - enable pull-up by setting port to 1
+      	SetQtrPinHigh(1,1,1,1,1);
+
+      	_delay_us(10);
+
+      	// disable pull- up by setting port to 0
+      	ConfigureQtrPinAsInput(1,1,1,1,1);
+      	SetQtrPinLow(1,1,1,1,1);
+
+      	//count the time in between on and off.
+      	brightness = 0;
+      	while((Sensor_Pin & sensor_select) != 0x00)
+      	{
+
+      		if (brightness >= max_threshold)
+      		{
+      			break;
+      		}
+      		brightness ++;
+      	}
+
+      	 if(sensor == right_most_sensor) { brightness_value_sensor1 = brightness; }
+      	 if(sensor == right_of_middle_sensor) { brightness_value_sensor2 = brightness; }
+      	 if(sensor == middle_sensor) { brightness_value_sensor3 = brightness; }
+      	 if(sensor == left_of_middle_sensor) { brightness_value_sensor4 = brightness; }
+      	 if(sensor == left_most_sensor) { brightness_value_sensor5 = brightness; }
+
+
+      	return brightness;
+      }
+
+
+      /* The following define whether the color read by each sensor is dark
+      		enough to use. True means it is dark enough. False means it is
+      		 lighter than < minimum_brightness > and should not be used. */
+      bool CompareSensorValue(uint8_t sensor)
+      {
+      	uint32_t sensor_select;
+      	bool* Light_vs_Dark; //This will point to the appropriate global variable containing the true/false for each individual sensor.
+      	if(sensor == right_most_sensor) { sensor_select = brightness_value_sensor1; }
+      	if(sensor == right_of_middle_sensor) { sensor_select = brightness_value_sensor2; }
+      	if(sensor == middle_sensor) { sensor_select = brightness_value_sensor3; }
+      	if(sensor == left_of_middle_sensor) { sensor_select = brightness_value_sensor4; }
+      	if(sensor == left_most_sensor) { sensor_select = brightness_value_sensor5; }
+
+      	if(sensor_select >= (minimum_brightness - 0x0008) )
+      	{
+      		// Use this value for line tracking b/c it is as dark or darker than correct line.
+      		return true;
+
+      	}
+      	else
+      	{
+      		// Discard / don't use for line tracking this b/c this is lighter than color of correct line.
+      		return false;
+      	}
+
+      	return;
+      }
+
+
+      void ConfigureQtrPinAsOutput(bool pin0, bool pin1, bool pin2, bool pin3, bool pin4)
+      {
+      	if(pin0) {Sensor_DDR |= (1 << Right_sensor_1);}
+
+      	if(pin1) { Sensor_DDR |= (1 << Right_sensor_2); }
+
+      	if(pin2) { Sensor_DDR |= (1 << Middle_sensor_3); }
+
+      	if(pin3) { Sensor_DDR |= (1 << Left_Sensor_1); }
+
+      	if(pin4) { Sensor_DDR |= (1<< Left_Sensor_2); }
+
+      	return;
+      }
+
+      void SetQtrPinHigh(bool pin0, bool pin1, bool pin2, bool pin3, bool pin4)
+      {
+
+      	if(pin0) { Sensor_Port |= (1 << Right_sensor_1); }
+
+      	if(pin1) { Sensor_Port |= (1 << Right_sensor_2); }
+
+      	if(pin2){ Sensor_Port |= (1 << Middle_sensor_3); }
+
+      	if(pin3) { Sensor_Port |= (1 << Left_Sensor_1); }
+
+      	if(pin4) { Sensor_Port |= (1 << Left_Sensor_2); }
+
+      	return;
+      }
+
+      void ConfigureQtrPinAsInput(bool pin0, bool pin1, bool pin2, bool pin3, bool pin4)
+      {
+      	if(pin0) {Sensor_DDR &= ~(1 << Right_sensor_1);}
+
+      	if(pin1) { Sensor_DDR &= ~(1 << Right_sensor_2); }
+
+      	if(pin2) { Sensor_DDR &= ~(1 << Middle_sensor_3); }
+
+      	if(pin3) { Sensor_DDR &= ~(1 << Left_Sensor_1); }
+
+      	if(pin4) { Sensor_DDR &= ~(1<< Left_Sensor_2); }
+
+
+      	return;
+
+      }
+
+      void SetQtrPinLow(bool pin0, bool pin1, bool pin2, bool pin3, bool pin4)
+      {
+      	if(pin0) { Sensor_Port &= ~(1 << Right_sensor_1); }
+
+      	if(pin1) { Sensor_Port &= ~(1 << Right_sensor_2); }
+
+      	if(pin2){ Sensor_Port &= ~(1 << Middle_sensor_3); }
+
+      	if(pin3) { Sensor_Port &= ~(1 << Left_Sensor_1); }
+
+      	if(pin4) { Sensor_Port &= ~(1 << Left_Sensor_2); }
+
+
+      	return;
+      }
+
+
+    </pre>
+  </div>
+
+
+  <div class="row">
+    <a class="col-md-12 Font-Ariel2" id="button8" href="#">Show/Hide SensorCalibration.h </a>
+    <pre class="prettyprint" id="code_8" style="border:4px solid #88c">
+      /*
+       * SensorCalibration.h
+       *
+       * Created: 12/18/2015 3:57:25 PM
+       *  Author: Ariel
+       */
+
+      //#ifndef SENSORCALIBRATION_H_
+      //#define SENSORCALIBRATION_H_
+
+      #include <stdbool.h>
+
+      #define Sensor_DDR DDRC
+      #define Sensor_Port PORTC
+      #define Sensor_Pin PINC
+
+      // Symbols: < arrows > indicate on/true. < * > means off/false.
+      // numbers = sensors in descending order from left to right.(Robot on ground with LCD facing up).
+      // This notation is used throughout the project.
+
+      #define right_most_sensor 0x01		 //		5 4 3 2 1
+      									 //		* * * * >
+
+      #define right_of_middle_sensor 0x02	 //	    5 4 3 2 1
+      									 //		* * * > *
+
+      #define middle_sensor 0x04			 //		5 4 3 2 1
+      									 //		* * ^ * *
+
+      #define left_most_sensor 0x10	   	 //		5 4 3 2 1
+      									 //		* < * * *
+
+      #define left_of_middle_sensor 0x08	 //		5 4 3 2 1
+      									 //		< * * * *
+
+      #define all_sensors 0x1F			 //		5 4 3 2 1
+      									 //		< < ^ > >
+
+
+      //Pin mappings/location for each sensor on PIN C.
+      #define Right_sensor_1 0 // Right most sensor			* * * * >
+      #define Right_sensor_2 1 // 2nd to rightmost sensor		* * * > *
+      #define Middle_sensor_3 2// middle sensor				* * ^ * *
+      #define Left_Sensor_2 3	// 2nd to leftmost sensor		* < * * *
+      #define Left_Sensor_1 4	// leftmost sensor				< * * * *
+
+
+      //Global variables used to store initial/minimum and updated sensor color readings.
+      uint32_t minimum_brightness;
+      uint32_t brightness_value_sensor1;
+      uint32_t brightness_value_sensor2;
+      uint32_t brightness_value_sensor3;
+      uint32_t brightness_value_sensor4;
+      uint32_t brightness_value_sensor5;
+
+
+      int16_t left_motor_speed;
+      int16_t right_motor_speed;
+
+
+      //Function Declarations
+      void GetInitialMinumumBrightnessValue();
+      uint32_t GetSensorValue(uint8_t sensor);// in hex.
+      void ConfigureQtrPinAsOutput(bool pin0, bool pin1, bool pin2, bool pin3, bool pin4);
+      void SetQtrPinHigh(bool pin0, bool pin1, bool pin2, bool pin3, bool pin4);
+      void ConfigureQtrPinAsInput(bool pin0, bool pin1, bool pin2, bool pin3, bool pin4);
+      void SetQtrPinLow(bool pin0, bool pin1, bool pin2, bool pin3, bool pin4);
+      void Turn_on_Sensors();
+      bool CompareSensorValue(uint8_t sensor);
+
+
+      //#endif /* SENSORCALIBRATION_H_ */
+
+    </pre>
+  </div>
+
+
+
+  <div class="row">
+    <a class="col-md-12 Font-Ariel2" id="button9" href="#">Show/Hide QTR_PWM.c </a>
+    <pre class="prettyprint" id="code_9" style="border:4px solid #88c">
+      /*
+       * QTR_PWM.c
+       *
+       * Created: 12/18/2015 8:24:32 PM
+       *  Author: Ariel
+       *
+       *
+       * Created: 11/16/2015 8:31:18 PM
+       *  Author: Ariel
+       */
+
+      #include <pololu/3pi.h>
+      #include <avr/io.h>
+      #include "QTR_PWM.h"
+      #define F_CPU 20000000  // system clock is 20 MHz
+      #include <util/delay.h>  // uses F_CPU to achieve us and ms delays
+      #include "main.h"
+
+      int QTR_PWM_MAIN()
+      {
+
+      	ConfigureSensors();
+      	configure_left_motor();
+      	configure_right_motor();
+
+
+      	/*while(1)
+      	{
+      		//GetSensorValues();
+      	}*/
+
+      	green_led(1);
+
+      	return 0;
+      }
+
+      void CorrectCourse(int direction)
+      {
+      	if(direction == 0)
+      	{
+      		//If traveling left, then correct course by turning right until the middle sensor sees the black line again. Then set motors to equal again.
+      		set_left_motor_speed(50);
+      		set_right_motor_speed(40);
+      		shift_left_motor_forward();
+      		shift_right_motor_forward();
+      	}
+      	else if(direction == 1)
+      	{
+      		//If traveling right, then correct course by turning left until the middle sensor sees the black line again. Then set motors to equal again.
+      		set_left_motor_speed(0);
+      		set_right_motor_speed(50);
+      		shift_left_motor_forward();
+      		shift_right_motor_forward();
+      	}
+      	else if(direction == 2)
+      	{
+      		shift_left_motor_coast();
+      		shift_right_motor_coast();
+      		shift_left_motor_reverse();
+      	    shift_right_motor_reverse();
+      		set_left_motor_speed(50);
+      		set_right_motor_speed(50);
+      	}
+
+      	else
+      	{
+      		shift_left_motor_forward();
+      		shift_right_motor_forward();
+      	}
+
+      	return;
+      }
+      void ConfigureSensors()
+      {
+      	//Set the Sensors PINS to inputs.
+      	LightSensors_DDR &= ~(1 << LightSensor_1);
+      	LightSensors_DDR &= ~(1 << LightSensor_2);
+      	LightSensors_DDR &= ~(1 << LightSensor_3);
+      	LightSensors_DDR &= ~(1 << LightSensor_4);
+      	LightSensors_DDR &= ~(1 << LightSensor_5);
+
+      	//Enable pull-ups by setting ports high
+      	LightSensors_PORT |= (1 << LightSensor_1);
+      	LightSensors_PORT |= (1 << LightSensor_2);
+      	LightSensors_PORT |= (1 << LightSensor_3);
+      	LightSensors_PORT |= (1 << LightSensor_4);
+      	LightSensors_PORT |= (1 << LightSensor_5);
+      	return;
+      }
+
+      void Steering(bool cases, bool sensor_reading[])
+      {
+      	if( cases)
+      	{
+      		left_motor_speed = 60;
+      		right_motor_speed = 60;
+      	}
+
+      //Case 1: 1 2 3 4 5		Middle sensor sees a line.
+      //		  * * ^ * *
+      	if(sensor_reading[2]) // if it is 1 it is whiter. 0 is darker.
+      	{
+      		set_left_motor_speed(60);
+      		left_motor_speed = 60;
+      		set_right_motor_speed(60);
+      		right_motor_speed = 60;
+      		shift_left_motor_forward();
+      		shift_right_motor_forward();
+
+      	}
+
+      //Case 2: 1 2 3 4 5
+      //		  * < ^ > >
+      	 else if ((!sensor_reading[0]) & (sensor_reading[1]) & (sensor_reading[2]) & (sensor_reading[3]) & (sensor_reading[4]))
+      	{
+      		set_left_motor_speed(60);
+      		left_motor_speed = 60;
+      		set_right_motor_speed(50);
+      		right_motor_speed = 50;
+      	 	shift_left_motor_forward();
+      		shift_right_motor_forward();
+      	}
+
+      //Case 3: 1 2 3 4 5  1 & 2 see white.
+      //		  * * ^ > >
+      	else if((!sensor_reading[0]) & (!sensor_reading[1]) & (sensor_reading[2]) & (sensor_reading[3]) & (sensor_reading[4]))
+      	{
+      		set_left_motor_speed(60 );
+      		left_motor_speed = 60 ;
+      		set_right_motor_speed(35 );
+      		right_motor_speed = 35 ;
+      		shift_left_motor_forward();
+      		shift_right_motor_forward();
+      	}
+
+      //Case 4: 1 2 3 4 5
+      //		  * * * > >
+      	else if ((!sensor_reading[0]) & (!sensor_reading[1]) & (!sensor_reading[2]) & (sensor_reading[3]) & (sensor_reading[4]))
+      	{
+      		set_left_motor_speed(60 );
+      		left_motor_speed = 60 ;
+      		set_right_motor_speed(25 );
+      		right_motor_speed = 25 ;
+      		shift_left_motor_forward();
+      		shift_right_motor_forward();
+      	}
+
+
+      //Case 5: 1 2 3 4 5
+      //		  * * * * >
+      	else if ((!sensor_reading[0]) & (!sensor_reading[1]) & (!sensor_reading[2]) & (!sensor_reading[3]) & (sensor_reading[4]))
+      	{
+      		set_left_motor_speed(60 );
+      		left_motor_speed = 60 ;
+      		set_right_motor_speed(0 );
+      		right_motor_speed = 0 ;
+      		shift_left_motor_forward();
+      		shift_right_motor_forward();
+      	}
+
+      //Case 6: 1 2 3 4 5
+      //		  < < ^ > *
+      	else if((sensor_reading[0]) & (sensor_reading[1]) & (sensor_reading[2]) & (sensor_reading[3]) & (!sensor_reading[4]))
+      	{
+      		set_left_motor_speed(60);
+      		left_motor_speed = 60;
+      		set_right_motor_speed(50);
+      		right_motor_speed = 50;
+      		shift_left_motor_forward();
+      		shift_right_motor_forward();
+      	}
+
+      //Case 7: 1 2 3 4 5
+      //		  < < ^ * *
+      	else if((sensor_reading[0]) & (sensor_reading[1]) & (sensor_reading[2]) & (!sensor_reading[3]) & (!sensor_reading[4]))
+      	{
+      		set_left_motor_speed(35 );
+      		left_motor_speed = 35 ;
+      		set_right_motor_speed(60 );
+      		right_motor_speed = 60 ;
+      		shift_left_motor_forward();
+      		shift_right_motor_forward();
+      	}
+
+
+      //Case 8: 1 2 3 4 5
+      //		  < < * * *
+      	else if((sensor_reading[0]) & (sensor_reading[1]) & (!sensor_reading[2]) & (!sensor_reading[3]) & (!sensor_reading[4]))
+      	{
+      		set_left_motor_speed(25 );
+      		left_motor_speed = 25 ;
+      		set_right_motor_speed(60 );
+      		right_motor_speed = 60 ;
+      		shift_left_motor_forward();
+      		shift_right_motor_forward();
+      	}
+
+      //Case 9: 1 2 3 4 5
+      //		  < * * * *
+      	else if((sensor_reading[0]) & (!sensor_reading[1]) & (!sensor_reading[2]) & (!sensor_reading[3]) & (!sensor_reading[4]))
+      	{
+      		set_left_motor_speed(0 );
+      		left_motor_speed = 0 ;
+      		set_right_motor_speed(60);
+      		right_motor_speed = 60;
+      		shift_left_motor_forward();
+      		shift_right_motor_forward();
+      	}
+
+      //Case 9: 1 2 3 4 5
+      //		   * < ^ > *
+      	else if((!sensor_reading[0]) & (sensor_reading[1]) & (sensor_reading[2]) & (sensor_reading[3]) & (!sensor_reading[4]))
+      	{
+      		set_left_motor_speed(60);
+      		left_motor_speed = 60;
+      		set_right_motor_speed(60);
+      		right_motor_speed = 60;
+      		shift_left_motor_forward();
+      		shift_right_motor_forward();
+      	}
+
+      //Case 11: 1 2 3 4 5
+      //		   * < ^ * *
+      	else if ((!sensor_reading[0]) & (sensor_reading[1]) & (sensor_reading[2]) & (!sensor_reading[3]) & (!sensor_reading[4]))
+      	{
+      		set_left_motor_speed(60);
+      		left_motor_speed = 60;
+      		set_right_motor_speed(60);
+      		right_motor_speed = 60;
+      		shift_left_motor_forward();
+      		shift_right_motor_forward();
+      	}
+
+      //Case 12: 1 2 3 4 5
+      //		   * * ^ > *
+      	else if ((!sensor_reading[0]) & (!sensor_reading[1]) & (sensor_reading[2]) & (sensor_reading[3]) & (!sensor_reading[4]))
+      	{
+      		set_left_motor_speed(60);
+      		left_motor_speed = 60;
+      		set_right_motor_speed(60);
+      		right_motor_speed = 60;
+      		shift_left_motor_forward();
+      		shift_right_motor_forward();
+      	}
+
+      //Case 13: 5 4 3 2 1		 All white
+      //		  * * * * *
+      	else if((!sensor_reading[0]) & (!sensor_reading[1]) & (!sensor_reading[2]) & (!sensor_reading[3]) & (!sensor_reading[4]))
+      	{
+      		if(left_motor_speed >= right_motor_speed)
+      		{
+      			set_left_motor_speed( left_motor_speed);
+      			set_right_motor_speed( right_motor_speed - 20);
+      		}
+      		else
+      		{
+      			set_left_motor_speed( left_motor_speed - 20);
+      			set_right_motor_speed( right_motor_speed);
+      		}
+      		shift_left_motor_forward();
+      		shift_right_motor_forward();
+      		//shift_right_motor_brake();
+      		//shift_left_motor_brake();
+      	}
+
+      	else
+      	{
+
+      		set_left_motor_speed( 20);
+      		set_right_motor_speed( 20);
+      		shift_left_motor_forward();
+      		shift_right_motor_forward();
+      		//shift_right_motor_brake();
+      		//shift_left_motor_brake();
+      	}
+
+
+      	return;
+      }
+
+      void configure_left_motor()
+      {
+      	Left_Motor_A_PWM_in_out = 0xF3;
+      	Left_Motor_B_PWM_in_out = 0x02;
+
+      	//initialize all PWM's to 0%
+      	Left_Motor_A_PWM = 0;
+      	Left_Motor_B_PWM = 0;
+
+      	//set PWM pins as outputs. Same as regular motor configuration.
+      	Left_Motor_A_DDR |= (1 << 5) | (1 << 6); // # define these
+
+      }
+
+      void configure_right_motor()
+      {
+      	Right_Motor_A_PWM_in_out = 0xF3;
+      	Right_Motor_B_PWM_in_out = 0x02;
+
+      	//initialize all PWM's to 0%
+      	Right_Motor_A_PWM = 0;
+      	Right_Motor_B_PWM = 0;
+
+      	//Set PWM pins as outputs. Same as regular motor configuration.
+      	Right_Motor_A_DDR |= (1 << 3);
+      	Right_Motor_B_DDR |= (1 << 3);
+      }
+
+      void set_left_motor_speed(uint8_t speed)
+      {
+      	pwm_left = speed;
+      	return;
+      }
+
+      void set_right_motor_speed(unsigned char speed)
+      {
+      	pwm_right = speed;
+      	return;
+      }
+
+      uint8_t get_left_motor_speed()
+      {
+      	return pwm_left;
+      }
+
+      uint8_t get_right_motor_speed()
+      {
+      	return pwm_right;
+      }
+
+
+      void shift_left_motor_forward()
+      {
+      	//Built in protection to prevent the instant switching between forward and backwards rotation.
+      	shift_left_motor_brake();
+      	//_delay_ms(100);
+
+      	Left_Motor_A_PWM = 0;
+      	Left_Motor_B_PWM = pwm_left;
+      }
+
+
+      void shift_right_motor_forward()
+      {
+      	//Built in protection to prevent the instant switching between forward and backwards rotation.
+      	shift_right_motor_brake();
+      	//_delay_ms(100);
+
+      	Right_Motor_A_PWM = 0;
+      	Right_Motor_B_PWM = pwm_right;
+      }
+
+      void shift_left_motor_reverse()
+      {
+      	//Built in protection to prevent the instant switching between forward and backwards rotation.
+      	shift_left_motor_brake();
+      	//_delay_ms(100);
+
+      	Left_Motor_A_PWM = pwm_left;
+      	Left_Motor_B_PWM = 0;
+      	return;
+      }
+
+      void shift_right_motor_reverse()
+      {
+      	//Built in protection to prevent the instant switching between forward and backwards rotation.
+      	shift_right_motor_brake();
+      	//_delay_ms(100);
+
+      	Right_Motor_A_PWM = pwm_right;
+      	Right_Motor_B_PWM = 0;
+      	return;
+      }
+
+      void shift_left_motor_brake()
+      {
+      	Left_Motor_A_PWM = pwm_left;
+      	Left_Motor_B_PWM = pwm_left;
+      }
+
+      void shift_right_motor_brake()
+      {
+      	Right_Motor_A_PWM = pwm_right;
+      	Right_Motor_B_PWM = pwm_right;
+      }
+
+      void shift_left_motor_coast()
+      {
+      	Left_Motor_A_PWM = 0;
+      	Left_Motor_B_PWM = 0;
+      }
+      void shift_right_motor_coast()
+      {
+      	Right_Motor_A_PWM = 0;
+      	Right_Motor_B_PWM = 0;
+      }
+
+    </pre>
+  </div>
+
+
+  <div class="row">
+    <a class="col-md-12 Font-Ariel2" id="button10" href="#">Show/Hide QTR_PWM.h </a>
+    <pre class="prettyprint" id="code_10" style="border:4px solid #88c">
+      /*
+       * QTRSensor.h
+       *
+       * Created: 12/18/2015 8:21:00 PM
+       *  Author: Ariel
+       */
+
+      //
+      //
+      //
+      //
+      //
+
+
+      //Pre-Precessor Definitions
+      #define LightSensors_DDR DDRC
+      #define LightSensors PINC
+      #define LightSensors_PORT PORTC
+      #define LightSensor_1 0
+      #define LightSensor_2 1
+      #define LightSensor_3 2
+      #define LightSensor_4 3
+      #define LightSensor_5 4
+      #include <stdbool.h>
+
+
+      #include <stdio.h>
+      #include <avr/io.h>
+      #define F_CPU 20000000  // system clock is 20 MHz
+      #include <util/delay.h>  // uses F_CPU to achieve us and ms delays
+      #include <stdbool.h>
+
+      //Pre-Processor definitions
+      #define Left_Motor_A_PWM_in_out TCCR0A
+      #define Left_Motor_B_PWM_in_out TCCR0B
+      #define Right_Motor_A_PWM_in_out TCCR2A
+      #define Right_Motor_B_PWM_in_out TCCR2B
+      #define Left_Motor_A_PWM OCR0A
+      #define Left_Motor_B_PWM OCR0B
+      #define Left_Motor_A_DDR DDRD
+      #define Left_Motor_B_DDR DDRD
+      #define Left_Motor_A_Location 5
+      #define Left_Motor_B_Location 6
+      #define Right_Motor_A_PWM OCR2A
+      #define Right_Motor_B_PWM OCR2B
+      #define Right_Motor_A_DDR DDRD
+      #define Right_Motor_B_DDR DDRB
+      #define Right_Motor_A_Location 3
+      #define Right_Motor_B_Location 3
+      #define Sensor_White 0
+      #define Sensor_Black 1
+
+      //Global variables used for the Left and Right motor PWM's
+      uint8_t pwm_left = 0;
+      uint8_t pwm_right = 0;
+
+      unsigned char Sensor;
+
+      void ConfigureSensors();
+
+      void Steering(bool cases, bool sensor_reading[]);
+
+      void DetermineLineLocation();
+
+      void CorrectCourse(int direction);
+
+
+      //Function declarations
+      void set_left_motor_speed(uint8_t speed);
+      void set_right_motor_speed(uint8_t speed);
+      uint8_t get_left_motor_speed();
+      uint8_t get_right_motor_speed();
+      void shift_left_motor_forward();
+      void shift_right_motor_forward();
+      void shift_left_motor_reverse();
+      void shift_right_motor_reverse();
+      void shift_left_motor_brake();
+      void shift_right_motor_brake();
+      void shift_left_motor_coast();
+      void shift_right_motor_coast();
+      void configure_left_motor();
+      void configure_right_motor();
+
+    </pre>
+  </div>
+
+  <div class="row">
+    <a class="col-md-12 Font-Ariel2" id="button11" href="#">Show/Hide PID Control.c </a>
+    <pre class="prettyprint" id="code_11" style="border:4px solid #88c">
+      /*
+       * PID_Control.c
+       *
+       * Created: 12/18/2015 9:18:07 PM
+       *  Author: Ariel
+       */
+
+      #include "main.h"
+
+
+
+      void InitializePID()
+      {
+      	difference = 0;
+      	target_position = 0;
+      	measured_position = 0;
+      	proportional = 0;
+      	rate_of_change = 0;
+      	derivative = 0;
+      	previous_difference = 0;
+      	time_interval = 2; // in us.
+      	integral = 0;
+
+      	kp = 0;
+      	kd = 0;
+      	ki = 0;
+      	return;
+      }
+
+
+
+      void PID_Controller(uint8_t Duty_Cycle, bool* sensor_reading)
+      {
+
+      	// Proportional Part of PID:
+      	difference = (target_position - measured_position);
+      	proportional = kp * difference;
+
+      	//Derivative part of PID:
+      	rate_of_change = (difference - previous_difference);
+      	previous_difference = difference;
+      	derivative = kd * rate_of_change;
+
+      	//Integral part of PID:
+      	integral = integral + difference;
+      	integral = ki * integral;
+
+      	//Final Control Value:
+      	result = proportional + derivative + integral;
+
+      	if(result < -1)
+      	{
+      		result = -1;
+      	}
+      	if(result > 1)
+      	{
+      		result = 1;
+      	}
+
+
+      	if((!sensor_reading[4]) & (!sensor_reading[3]) & (!sensor_reading[2]) & (!sensor_reading[1]) & (!sensor_reading[0]))
+      	{
+      		left_motor_speed = left_motor_speed;
+      		right_motor_speed = right_motor_speed;
+
+
+      		set_left_motor_speed(left_motor_speed);
+      		set_right_motor_speed(right_motor_speed);
+
+      		shift_left_motor_forward();
+      		shift_right_motor_forward();
+      		//_delay_us(100);
+      	}
+
+      	else
+      	{
+
+      		left_motor_speed = Duty_Cycle - (result * Duty_Cycle);
+      		right_motor_speed = Duty_Cycle + (result * Duty_Cycle);
+
+
+      		if(left_motor_speed < 0)
+      		{
+      			left_motor_speed = 0;
+      		}
+      		if(left_motor_speed > 255)
+      		{
+      			left_motor_speed = 255;
+      		}
+
+
+      		if(right_motor_speed < 0)
+      		{
+      			right_motor_speed = 0;
+      		}
+      		if(right_motor_speed > 255)
+      		{
+      			right_motor_speed = 255;
+      		}
+
+      		set_left_motor_speed(left_motor_speed);
+      		set_right_motor_speed(right_motor_speed);
+
+      		shift_left_motor_forward();
+      		shift_right_motor_forward();
+      	}
+
+      	return;
+      }
+
+      void GetMeasuredPosition(bool *sensor_reading)
+      {
+      	//Sensor values in descending order.
+
+      	/* Case 1:
+      		 5 4 3 2 1
+      		 < < ^ > >		*/
+      	/*if (sensor_reading[4] & sensor_reading[3] & sensor_reading[2] & sensor_reading[1] & sensor_reading[0])
+      	{
+      		measured_position = -5;
+      	}*/
+
+      /* Case2:
+      		 5 4 3 2 1
+      		 * * * * >		*/
+      	 if ((!sensor_reading[4]) & (!sensor_reading[3]) & (!sensor_reading[2]) & (!sensor_reading[1]) & sensor_reading[0])
+      	{
+      		measured_position = -1;
+      	}
+
+      /* Case3:
+      		 5 4 3 2 1
+      		 * * * > >		*/
+      	else if ((!sensor_reading[4]) & (!sensor_reading[3]) & (!sensor_reading[2]) & sensor_reading[1] & sensor_reading[0])
+      	{
+      		measured_position = -0.5;
+      	}
+
+      /* Case 4:
+      		 5 4 3 2 1
+      		 * * * > *		*/
+      	else if ((!sensor_reading[4]) & (!sensor_reading[3]) & (!sensor_reading[2]) & sensor_reading[1] & (!sensor_reading[0]))
+      	{
+      		measured_position = -0.25;
+      	}
+
+      /* Case 5:
+      		 5 4 3 2 1
+      		 * * ^ > *		*/
+      	else if ((!sensor_reading[4]) & (!sensor_reading[3]) & sensor_reading[2] & sensor_reading[1] & (!sensor_reading[0]))
+      	{
+      		measured_position = -0.125;
+      	}
+
+      /* Case 6:
+      		 5 4 3 2 1
+      		 * * ^ * *		*/
+      	else if((!sensor_reading[4]) & (!sensor_reading[3]) & sensor_reading[2] & (!sensor_reading[1]) & (!sensor_reading[0]))
+      	{
+      		measured_position = 0;
+      	}
+
+      /* Case 7:
+      		 5 4 3 2 1
+      		 * < ^ * *		*/
+      	else if ((!sensor_reading[4]) & sensor_reading[3] & sensor_reading[2] & (!sensor_reading[1]) & (!sensor_reading[0]))
+      	{
+      		measured_position = 0.125;
+      	}
+
+      /* Case 8:
+      		 5 4 3 2 1
+      		 * < * * *		*/
+      	else if ((!sensor_reading[4]) & sensor_reading[3] & (!sensor_reading[2]) & (!sensor_reading[1]) & (!sensor_reading[0]))
+      	{
+      		measured_position = 0.25;
+      	}
+
+      /* Case 9:
+      		 5 4 3 2 1
+      		 < < * * *		*/
+      	else if (sensor_reading[4] & sensor_reading[3] & (!sensor_reading[2]) & (!sensor_reading[1]) & (!sensor_reading[0]))
+      	{
+      		measured_position = 0.5;
+      	}
+
+      /* Case 10:
+      		5 4 3 2 1
+      		< * * * *		*/
+      	else if ((!sensor_reading[4]) & (!sensor_reading[3]) & (!sensor_reading[2]) & (!sensor_reading[1]) & (!sensor_reading[0]))
+      	{
+      		measured_position = 1;
+      	}
+
+      /* Case 11: 5 4 3 2 1
+      			* * * * *	*/
+      	else if ((!sensor_reading[4]) & (!sensor_reading[3]) & (!sensor_reading[2]) & (!sensor_reading[1]) & (!sensor_reading[0]))
+      	{
+      		measured_position = 5;
+      	}
+
+      	else { ; }
+
+      	return;
+      }
+
+
+      void SetKpValue()
+      {
+
+      	print(("Enter Kp"));
+      	uint8_t incr = 0x00;
+
+      	while(1)
+      	{
+      		if(!right_button_is_pressed())
+      		{
+      			clear();
+      			_delay_ms(400);
+      			break;
+      		}
+      		if(!middle_button_is_pressed())
+      		{
+      			kp = kp + 5;
+      			incr += 5;
+      			clear();
+      			print_hex_byte(incr);
+      			_delay_ms(400);
+      		}
+      		if(!left_button_is_presed())
+      		{
+      			kp = kp - 5;
+      			incr = incr - 5;
+      			clear();
+      			print_hex_byte(incr);
+      			_delay_ms(400);
+      		}
+      	}
+      	return;
+      }
+
+
+      void SetKdValue()
+      {
+      	print(("Enter Kd"));
+      	uint8_t incr = 0x00;
+
+      	while(1)
+      	{
+      		if(!right_button_is_pressed())
+      		{
+      			clear();
+      			_delay_ms(500);
+      			break;
+      		}
+      		if(!middle_button_is_pressed())
+      		{
+      			kd = kd + 5;
+      			incr += 5;
+      			clear();
+      			print_hex_byte(incr);
+      			_delay_ms(500);
+      		}
+      		if(!left_button_is_presed())
+      		{
+      			kd = kd - 5;
+      			incr = incr - 5;
+      			clear();
+      			print_hex_byte(incr);
+
+      			_delay_ms(500);
+      		}
+      	}
+      	return;
+      }
+
+      void SetKiValue()
+      {
+      	print(("Enter Ki"));
+      	uint8_t incr = 0x00;
+
+      	while(1)
+      	{
+      		if(!right_button_is_pressed())
+      		{
+      			clear();
+      			_delay_ms(500);
+      			break;
+      		}
+      		if(!middle_button_is_pressed())
+      		{
+      			ki = ki + .5;
+      			incr += 0x01;
+      			clear();
+      			print_hex_byte(incr);
+      			_delay_ms(500);
+      		}
+      		if(!left_button_is_presed())
+      		{
+      			ki = ki - 0x01;
+      			incr = incr - 0x01;
+      			clear();
+      			print_hex_byte(incr);
+      			_delay_ms(500);
+      		}
+      	}
+      	return;
+      }
+
+    </pre>
+  </div>
+
+  <div class="row">
+    <a class="col-md-12 Font-Ariel2" id="button12" href="#">Show/Hide PID Control.h </a>
+    <pre class="prettyprint" id="code_12" style="border:4px solid #88c">
+      /*
+       * PIID_Control.h
+       *
+       * Created: 12/18/2015 9:17:26 PM
+       *  Author: Ariel
+       */
+
+
+
+
+      void PID_Controller(uint8_t Duty_Cycle, bool sensor_reading[]);
+      void GetMeasuredPosition(bool sensor_reading[]);
+      void InitializePID();
+      void SetKpValue();
+      void SetKdValue();
+      void SetKiValue();
+
+
+      float difference;
+      float target_position;
+      float measured_position;
+      float proportional;
+      float rate_of_change;
+      float derivative;
+      float previous_difference;
+      float time_interval;
+      float integral;
+      float result;
+
+      float kp;
+      float kd;
+      float ki;
+
+      int16_t Left_motor_speed;
+      int16_t right_motor_speed;
+
+    </pre>
+  </div>
+
+  <div class="row">
+    <a class="col-md-12 Font-Ariel2" id="button13" href="#">Show/Hide Buzzer.c </a>
+    <pre class="prettyprint" id="code_13" style="border:4px solid #88c">
+      /*
+       * Buzzer.c
+       *
+       * Created: 12/18/2015 9:26:42 PM
+       *  Author: Ariel
+       */
+
+      #include "Buzzer.h"
+
+      void InitializeBuzzer()
+      {
+
+      	Buzzer_DDR |= Buzzer_location;
+
+      	TCCR1A |= (1<<0);
+      	TCCR1A |= (1<<4);
+      	TCCR1A |= (1<<5);
+      	TCCR1B |= (1<<4);
+
+
+      	return;
+      }
+
+      void startSound(uint32_t freq, uint8_t duration)
+      {
+      	uint32_t top = (F_CPU) / (freq);
+
+      	TCCR1B |= (1<<0);
+
+      	OCR1A = top;
+      	OCR1B = (top >> 2);
+
+      	uint8_t i;
+      	for(i=0; i< duration; i++)
+      	{
+      		_delay_ms(10000);
+      	}
+      	TCCR1B &= ~(1<<0);
+
+
+      	return;
+      }
+
+    </pre>
+  </div>
+
+  <div class="row">
+    <a class="col-md-12 Font-Ariel2" id="button14" href="#">Show/Hide Buzzer.h </a>
+    <pre class="prettyprint" id="code_14" style="border:4px solid #88c">
+      /*
+       * Buzzer.h
+       *
+       * Created: 12/18/2015 9:26:28 PM
+       *  Author: Ariel
+       */
+
+      #include <avr/io.h>
+      #include <util/delay.h>  // uses F_CPU to achieve us and ms delays
+      //#include <pololu/3pi.h>
+        // system clock is 20 MHz
+
+      #define Buzzer_DDR DDRB
+      #define Buzzer_PORT PORTB
+      #define Buzzer_PIN PINB
+
+      #define Buzzer_location (1 << 2)
+
+
+      void InitializeBuzzer();
+      void startSound(uint32_t freq, uint8_t duration);
+      //void music();
+
+    </pre>
+  </div>
+
+  <!-- <div class="row">
+    <a class="col-md-12 Font-Ariel2" id="button15" href="#">Show/Hide QTR_PWM.h </a>
+    <pre class="prettyprint" id="code_15" style="border:4px solid #88c">
+
+
+    </pre>
+  </div>
+
+  <div class="row">
+    <a class="col-md-12 Font-Ariel2" id="button16" href="#">Show/Hide QTR_PWM.h </a>
+    <pre class="prettyprint" id="code_16" style="border:4px solid #88c">
+
+
+    </pre>
+  </div> -->
+
+
+
+  <script src="js/shCore.js"></script>
+  <script src="js/shBrushCpp.js"></script>
+  <script> SyntaxHighlighter.all() </script>
+  <script src="js/Ariel_Site.js"></script>
+  <script>
+    $("#code_1").toggle();
+    $("#code_2").toggle();
+    $("#code_3").toggle();
+    $("#code_4").toggle();
+    $("#code_5").toggle();
+    $("#code_6").toggle();
+    $("#code_7").toggle();
+    $("#code_8").toggle();
+    $("#code_9").toggle();
+    $("#code_10").toggle();
+    $("#code_11").toggle();
+    $("#code_12").toggle();
+    $("#code_13").toggle();
+    $("#code_14").toggle();
+  </script>
+  <script>
+      $("#button1").click(function() {
+          $("#code_1").toggle();
+      })
+  </script>
+  <script>
+      $("#button2").click(function() {
+          $("#code_2").toggle();
+      })
+  </script>
+  <script>
+      $("#button3").click(function() {
+          $("#code_3").toggle();
+      })
+  </script>
+  <script>
+      $("#button4").click(function() {
+          $("#code_4").toggle();
+      })
+  </script>
+  <script>
+      $("#button5").click(function() {
+          $("#code_5").toggle();
+      })
+  </script>
+  <script>
+      $("#button6").click(function() {
+          $("#code_6").toggle();
+      })
+  </script>
+  <script>
+      $("#button7").click(function() {
+          $("#code_7").toggle();
+      })
+  </script>
+  <script>
+      $("#button8").click(function() {
+          $("#code_8").toggle();
+      })
+  </script>
+  <script>
+      $("#button9").click(function() {
+          $("#code_9").toggle();
+      })
+  </script>
+  <script>
+      $("#button10").click(function() {
+          $("#code_10").toggle();
+      })
+  </script>
+  <script>
+      $("#button11").click(function() {
+          $("#code_11").toggle();
+      })
+  </script>
+  <script>
+      $("#button12").click(function() {
+          $("#code_12").toggle();
+      })
+  </script>
+  <script>
+      $("#button13").click(function() {
+          $("#code_13").toggle();
+      })
+  </script>
+  <script>
+      $("#button14").click(function() {
+          $("#code_14").toggle();
+      })
+  </script>
+  <script>
+      $("#button15").click(function() {
+          $("#code_15").toggle();
+      })
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script type="text/javascript" src="js/jQuery.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Roboto:100italic' rel='stylesheet' type='text/css'>
+  <link href="css/bootstrap-theme.css" rel="stylesheet">
+  <link href="css/bootstrap.css"  rel="stylesheet">
+  <link href="css/site.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lato:100,300' rel='stylesheet' type='text/css'>
+  <title> My Site </title>
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <script type="text/javascript" src="js/jQuery.js"></script>
+  <script type="text/javascript" src="js/bootstrap.min.js"></script>
+  <link href="css/site.css" rel="stylesheet">
+
+  <script src="https://www.google.com/uds/api?file=uds.js&v=1.0&key=YOURKEYHERE" type="text/javascript"></script>
+  <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js?autoload=true&amp;skin=sunburst&amp;lang=css" defer="defer"></script>
+
+
+</head>
+
+<body class="BodyBackground1 " onload="prettyPrint()">
+  <div id="Main" class="container TransparentBackgroundBlack">
+
+    <div class="row Description-font">
+      <p>
+        <pre>
+
+          This project consisted of
+
+        </pre>
+      </p>
+    </div>
+
+  <div class="row">
+
+    <!-- <a class= "col-md-12 Font-Ariel2" id="button1" href="#">Show/Hide "PythonApplication1.py"  File</a> -->
+    <pre class="prettyprint" id="code_1" style="border:4px solid #88c">
+      <code >
+
+        # Connect to device using tcp and keep restoring it while checking
+        #  for a "Data Abort" Error message.
+        import socket
+        import sys
+        import time
+
+        # Connect using tcp ----1
+        def EstablishConnection(IP):
+            TCP_IP = '172.30.144.210'
+            TCP_PORT = 41795
+            restored = 0
+            BUFFER_SIZE = 1024
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            print('Checking connection')
+            while 1:
+                try:
+                    s.connect((TCP_IP, TCP_PORT))
+                    restored = 1
+                except:
+                    print('.',end="")
+                    restored = 0
+                if restored == 1:
+                    print('Restore Complete. Connection Established')
+                    break
+            return s
+
+        def Task(s):
+            BUFFER_SIZE = 1024
+            av_found = 0;
+            CT = "taskstat\r\n"
+            s.send(CT.encode('ascii'))
+            time.sleep(1)
+            time1 = int(round(time.time() * 1000))
+            while 1:
+                task_data = s.recv(BUFFER_SIZE)
+               # print('task data:', task_data.decode('utf-8'), end="")
+                time2 = int(round(time.time() * 1000))
+                if 'avmanager.exe' in task_data.decode('utf-8'):
+                    av_found = 1
+                    break
+                elif time2-time1 > 300:
+                    break
+            return av_found
+
+        def Reboot(s):
+            BUFFER_SIZE = 1024
+            rest_cmd = "restore\r\n"
+            COMMAND = "taskstat\r\n"
+            s.send(rest_cmd.encode('ascii'))
+            time.sleep(1)
+            data3 = s.recv(BUFFER_SIZE)
+            print ("Reset out:\n", data3.decode('utf-8'),end="")
+            time.sleep(5) # wait for 5 seconds to get request for yes/no answer from device before sending the yes/no.
+            s.send('y'.encode('ascii'))  # send a yes to the prompt
+            print('Responded with yes')
+            return
+
+
+        def avTimeout(IP):
+            s2 = EstablishConnection(IP)
+            time.sleep(5)
+            av_found_3 = Task(s2)
+            if av_found_3 is 1:
+                 print('avmanager found')
+                 return s2
+            else:
+                s2.close()
+                print('attempt to find avmanager timed out. Closing connection and trying to connect again')
+                time.sleep(5)
+                return avTimeout(IP)
+
+        def ErrorDet(s):
+            t1 = int(round(time.time() * 1000))
+            t2 = 0
+            i = 0
+            BUFFER_SIZE = 1024
+            result = 0
+            print('got to ErrorDet function')
+            res_count = 0
+            s.send("err sys\r\n".encode('ascii'))
+            while 1:
+                t2 = int(round(time.time() * 1000))
+                data4 = s.recv(BUFFER_SIZE)
+
+                if "Data Abort" in data4.decode('utf-8') and (result == 0):
+                    result = 1
+                    print('The error has been detected! \n', data4.decode('utf-8'),end="")
+                elif "PC=" in data4.decode('utf-8') and (result == 1):
+                    print('more info1:', data4.decode('utf-8'))
+               # elif "RA=" in data4.decode('utf-8') and ((result & i) == 1):
+                   # print('more info2:', data4.decode('utf-8'))
+                    #print('Error Detection Complete')
+                    break
+                elif 'System Initialization Complete' in data4.decode('utf-8'):
+                    print('Error was NOT detected. Restoring and Testing again')
+                    print("Time in milliseconds:",t2-t1)
+                    break
+                #else:
+                 #   print("output", data4.decode('utf-8'),end="")
+            print('Finished ErrorDet Function \n')
+
+            return result
+
+        def test(s, IP):
+            Result = 0
+            counter = 0
+            while Result == 0:
+                Reboot(s)
+                time1 = int(round(time.time() * 1000))
+                print('Finished restore and now going to try to establish the connection again in 5 seconds \n')
+                time.sleep(5)
+                s = avTimeout(IP)
+                time.sleep(15)
+                time2 = int(round(time.time() * 1000))
+                print(time2 - time1)
+                Result = ErrorDet(s)
+                print(Result)
+                time.sleep(2)
+                counter = counter +1
+                print('Number of times Restored is:',counter)
+            print('Stoping Program')
+            s.close
+            return
+
+        # Main
+        print("Program started ")
+        IP =  '172.30.144.210'
+        #IP = str(sys.argv[1])
+        print('IP input is:', IP)
+        s = avTimeout(IP)
+        time.sleep(5)
+        test(s,IP)
+
+        #----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+        # Connect to device using tcp and keep restoring it while checking
+        #  for a "Data Abort" Error message.
+        import socket
+        import sys
+        import time
+
+        # Connect using tcp ----1
+        def EstablishConnection(IP):
+            TCP_IP = '172.30.144.210'
+            TCP_PORT = 41795
+            restored = 0
+            BUFFER_SIZE = 1024
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            print('Checking connection')
+            while 1:
+                try:
+                    s.connect((TCP_IP, TCP_PORT))
+                    restored = 1
+                except:
+                    print('.',end="")
+                    restored = 0
+                if restored == 1:
+                    print('Restore Complete. Connection Established')
+                    break
+            return s
+
+        def Task(s):
+            BUFFER_SIZE = 1024
+            av_found = 0;
+            task_status = "taskstat\r\n"
+            s.send(task_status.encode('ascii'))
+            time.sleep(1)
+            time1 = int(round(time.time() * 1000))
+            while 1:
+                task_data = s.recv(BUFFER_SIZE)
+               # print('task data:', task_data.decode('utf-8'), end="")
+                time2 = int(round(time.time() * 1000))
+                if 'avmanager.exe' in task_data.decode('utf-8'):
+                    av_found = 1
+                    break
+                elif time2-time1 > 300:
+                    break
+            return av_found
+
+        def Reboot(s):
+            BUFFER_SIZE = 1024
+            rest_cmd = "restore\r\n"
+            COMMAND = "taskstat\r\n"
+            s.send(rest_cmd.encode('ascii'))
+            time.sleep(1)
+            data3 = s.recv(BUFFER_SIZE)
+            print ("Reset out:\n", data3.decode('utf-8'),end="")
+            time.sleep(5)
+            s.send('y'.encode('ascii')) #send a yes to the prompt
+            print('Responded with yes')
+            return
+
+        def avTimeout(IP):
+            s2 = EstablishConnection(IP)
+            time.sleep(5)
+            av_found_3 = Task(s2)
+            if av_found_3 is 1:
+                 print('avmanager found')
+                 return s2
+            else:
+                s2.close()
+                print('attempt to find avmanager timed out. Closing connection and trying to connect again')
+                time.sleep(5)
+                return avTimeout(IP)
+
+        def ErrorDet(s, file):
+            BUFFER_SIZE = 1024
+            result = 0
+            print('got to ErrorDet function')
+            res_count = 0
+            s.send("err sys\r\n".encode('ascii'))
+            while 1:
+                data4 = s.recv(BUFFER_SIZE)
+                if "Data Abort" in data4.decode('utf-8') and (result == 0):
+                    result = 1
+                    print('The error has been detected! \n', data4.decode('utf-8'),end="")
+                    file.write('The error has been detected! \n')
+                    file.write(data4.decode('utf-8'))
+                elif "PC=" in data4.decode('utf-8') and (result == 1):
+                    print('more info1:', data4.decode('utf-8'))
+                    print('Error Detection Complete \n')   # this line prints out 2 lines. Try to find a way to limit the number of characters used.
+                    file.write('more info1: ')
+                    file.write(data4.decode('utf-8'))
+                    break
+                elif 'System Initialization Complete' in data4.decode('utf-8'):
+                    print('Error was NOT detected. Restoring and Testing again')
+                    file.write('Error was NOT detected. Restoring and Testing again \n')
+                    break
+                #else:
+                 #   print("output", data4.decode('utf-8'),end="")
+            print('Finished ErrorDet Function \n')
+            return result # result is used to tell the rest of the program whether or not an error was found.
+
+        # Main
+        print("Program started ")
+        IP =  '172.30.144.210'
+        #IP = str(sys.argv[1])
+        print('IP input is:', IP)
+        file = open('OUTPUT', 'w')
+        file.writelines('Program has started')
+        s = avTimeout(IP)
+        time.sleep(5)
+        Result = 0
+        counter = 0
+        while Result == 0:
+            Reboot(s)
+            print('Finished restore and now going to try to establish the connection again in 10 seconds \n')
+            time.sleep(10)
+            s = avTimeout(IP)
+            time.sleep(15)
+            Result = ErrorDet(s,file)
+            print(Result)
+            time.sleep(2)
+            counter = counter +1
+            print('Number of times Restored is:',counter)
+            file.write('Number of times Restored so far is: ')
+            #file.write(counter)
+        print('Stoping Program')
+        #file.write('Total number of times Restored is:', counter)
+        file.close()
+        s.close
+
+
+      </code>
+    </pre>
+  </div>
+
+  <script src="js/shCore.js"></script>
+  <script src="js/shBrushCpp.js"></script>
+  <script>
+    SyntaxHighlighter.all()
+  </script>
+  <script src="js/Ariel_Site.js"></script>
+</body>
+</html>

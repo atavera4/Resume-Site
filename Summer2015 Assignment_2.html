@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script type="text/javascript" src="js/jQuery.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Roboto:100italic' rel='stylesheet' type='text/css'>
+  <link href="css/bootstrap-theme.css" rel="stylesheet">
+  <link href="css/bootstrap.css"  rel="stylesheet">
+  <link href="css/site.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lato:100,300' rel='stylesheet' type='text/css'>
+  <title> My Site </title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <script type="text/javascript" src="js/jQuery.js"></script>
+  <script type="text/javascript" src="js/bootstrap.min.js"></script>
+  <link href="css/site.css" rel="stylesheet">
+
+  <script src="https://www.google.com/uds/api?file=uds.js&v=1.0&key=YOURKEYHERE" type="text/javascript"></script>
+  <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js?autoload=true&amp;skin=sunburst&amp;lang=css" defer="defer"></script>
+
+
+</head>
+
+<body class="BodyBackground1 " onload="prettyPrint()">
+  <div id="Main" class="container TransparentBackgroundBlack">
+
+    <div class="row Description-font">
+      <p>
+
+        <pre>
+
+
+          This Assignment involved writing a script that would scan all open ports on a network connected
+          device and provide the user with some information about them.
+
+        </pre>
+      </p>
+    </div>
+
+  <div class="row">
+
+    <!-- <a class= "col-md-12 Font-Ariel2" id="button1" href="#">Show/Hide C++ File</a> -->
+
+    <pre class="prettyprint" id="code_1" style="border:4px solid #88c">
+      <code >
+
+        #!/usr/bin/env python
+        import socket
+        import subprocess
+        import sys
+        from datetime import datetime
+        import platform
+        import threading
+        # Clear the screen
+        #subprocess.call('clear', shell=True)
+
+        # Ask for input
+        #remoteServer    = raw_input("Enter a remote host to scan: ")
+        remoteServerIP  = '172.30.145.99' #socket.gethostbyname(remoteServer)
+
+        # Print a nice banner with information on which host we are about to scan
+        print ("-" * 60)
+        print ("Please wait, scanning remote host", remoteServerIP)
+        print ("-" * 60)
+
+        # Check what time the scan started
+        t1 = datetime.now()
+
+        def EstablishConnection(IP):
+            TCP_IP = '172.30.145.99'
+            TCP_PORT = 41795
+            restored = 0
+            BUFFER_SIZE = 1024
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            print('Checking connection')
+            while 1:
+                try:
+                    s.connect((TCP_IP, TCP_PORT))
+                    restored = 1
+                except:
+                    print('.',end="")
+                    restored = 0
+                if restored == 1:
+                    print('Restore Complete. Connection Established')
+                    break
+            return s
+
+        def Task(s):
+            BUFFER_SIZE = 1024
+            av_found = 0;
+            task_status = "taskstat\r\n"
+            s.send(task_status.encode('ascii'))
+            time.sleep(1)
+            time1 = int(round(time.time() * 1000))
+            while 1:
+                task_data = s.recv(BUFFER_SIZE)
+               # print('task data:', task_data.decode('utf-8'), end="")
+                time2 = int(round(time.time() * 1000))
+                if 'avmanager.exe' in task_data.decode('utf-8'):
+                    av_found = 1
+                    break
+                elif time2-time1 > 300:
+                    break
+            return av_found
+
+
+
+
+
+        # Using multiplel threads to make it go faster by scanner more than 1 port at a time.
+        class myThread (threading.Thread):
+            def __init__(self,name, min_range, max_range):
+                threading.Thread.__init__(self)
+                self.name = name
+                self.min_range = min_range
+                self.max_range = max_range
+            def run(self):
+               # print(self.name)
+                # Using the range function to specify ports (here it will scans all ports between 1 and 1024)
+                # We also put in some error handling for catching errors
+                try:
+                    for port in range(self.min_range, self.max_range ):
+                        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                        result = sock.connect_ex((remoteServerIP, port))
+                        if result == 0:
+                            print ("\nPort {}: \t Open".format(port))
+                            print (" hostname is: ",socket.gethostbyaddr(remoteServerIP)[0] )
+                            try:
+                                print(" server name is: ",socket.getservbyport(port) )
+                            except:
+                                print('could not connect to this server \n')
+
+                       # else: print(".",end="")
+
+
+                        sock.close()
+                    print(self.name + 'done \n')
+
+
+                except KeyboardInterrupt:
+                    print ("You pressed Ctrl+C")
+                    sys.exit()
+
+                except socket.gaierror:
+                    print ('Hostname could not be resolved. Exiting')
+                    sys.exit()
+
+                except socket.error:
+                    print ("Couldn't connect to server")
+                    #sys.exit()
+
+        #Create new threads
+        A = [328]
+        num = 0
+        min_range = 1
+        max_range = 100
+        set = 0
+        while num <= 655:
+            A.append(myThread(str(num), min_range,max_range))
+            min_range = min_range + 100
+            max_range = max_range + 100
+            num = num+1
+            #if num == 328:
+             #   set = 1
+        A[656] = myThread(str(num), 65501,65534)
+
+        # start threads
+        #if set == 1:
+        for index in range(1, 656):
+            A[index].start()
+            if index == 656:
+                print('program finished checking all ports')
+
+        # Printing the information to screen
+        print ('Program has Started:')
+
+
+      </code>
+
+    </pre>
+  </div>
+
+  <script src="js/shCore.js"></script>
+  <script src="js/shBrushCpp.js"></script>
+  <script>
+    SyntaxHighlighter.all()
+  </script>
+  <script src="js/Ariel_Site.js"></script>
+</body>
+</html>

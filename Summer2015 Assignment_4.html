@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script type="text/javascript" src="js/jQuery.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Roboto:100italic' rel='stylesheet' type='text/css'>
+  <link href="css/bootstrap-theme.css" rel="stylesheet">
+  <link href="css/bootstrap.css"  rel="stylesheet">
+  <link href="css/site.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lato:100,300' rel='stylesheet' type='text/css'>
+  <title> My Site </title>
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <script type="text/javascript" src="js/jQuery.js"></script>
+  <script type="text/javascript" src="js/bootstrap.min.js"></script>
+  <link href="css/site.css" rel="stylesheet">
+
+  <script src="https://www.google.com/uds/api?file=uds.js&v=1.0&key=YOURKEYHERE" type="text/javascript"></script>
+  <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js?autoload=true&amp;skin=sunburst&amp;lang=css" defer="defer"></script>
+
+
+</head>
+
+<body class="BodyBackground1 " onload="prettyPrint()">
+  <div id="Main" class="container TransparentBackgroundBlack">
+
+    <div class="row Description-font">
+      <p>
+
+        <pre>
+
+
+          This Assignment involved ????????
+        </pre>
+      </p>
+    </div>
+
+  <div class="row">
+
+    <!-- <a class= "col-md-12 Font-Ariel2" id="button1" href="#">Show/Hide C++ File</a> -->
+
+    <pre class="prettyprint" id="code_1" style="border:4px solid #88c">
+      <code >
+
+
+        import socket
+        import sys
+        import time
+        import string
+        import datetime
+        import platform
+        import threading
+        import tkinter
+        from tkinter import Tk, Frame, Checkbutton, IntVar, Button, BOTH
+        from tkinter import *
+        from tkinter import BOTH, W, NW, SUNKEN, TOP, X, FLAT, LEFT
+
+
+
+        #---Connect to the IP address using the port(41795) for the device console as the default
+        def Connect(IP, port):
+            TCP_IP = IP
+            if port == 70000:
+                TCP_PORT = 41795
+            else:
+                TCP_PORT = int(port)
+            print(TCP_PORT)
+            BUFFER_SIZE = 1024
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            print('Checking connection')
+            while 1:
+                try:
+                    s.connect((TCP_IP, TCP_PORT))
+                    restored = 1
+                except:
+                    print('.',end="")
+                    restored = 0
+                if restored == 1:
+                    print('Connection Established')
+                    break
+            return s
+
+        #---WAIT FOR A SPECIFIED AMOUNT OF SECONDS
+        def DELAY(input_time):
+                time.sleep(int(input_time))
+                return
+
+        #----SEND COMMAND and PRINT RESPONSE FROM REMOTE DEVICE
+        def SEND_CMD(s, e2, e3, e4, check_box, check_box2):
+             result = 0
+             input = e2
+             input = input + '\r\n'
+             print(input)
+             #s.send('dir\r\n'.encode('ascii'))
+             s.send(input.encode('ascii'))
+             time.sleep(1)
+             feedback = s.recv(65536)
+
+             try:
+                 print(feedback.decode('utf-8')) # INSERT A TRY/EXCEPT HERE TO CATCH THE ERROR AND KEEP THE REST OF THE PROGRAM RUNNING.
+             except:
+                 print("could not print response this time")
+
+             if check_box == 1 and check_box2 != 1:
+                 if e3 in feedback.decode('utf-8') and not not e3:  #
+                     print("Item Found!!!")
+                     result = 1
+
+             if check_box !=1 and check_box2 == 1:
+                 if e4 not in feedback.decode('utf-8') and not not e4:  #
+                     print("item")
+                     print(e4)
+                     print("Missing!!!")
+                     result = 1
+
+             if check_box == 1 and check_box2 == 1:
+                 if e3 in feedback.decode('utf-8') and not not e3:
+                     print("Item Found!!!")
+                     result = 1
+                 elif e4 not in feedback.decode('utf-8') and not not e4:
+                     print("item")
+                     print(e4)
+                     print("Missing!!!")
+                     result = 1
+
+             return result
+
+
+
+        #----SEND COMMAND and PRINT RESPONSE FROM REMOTE DEVICE
+        def SEND_ONCE(s, init_cmd):
+
+            ## insert get CMD block here!!!!
+             input = init_cmd
+             input = input + '\r\n'
+             print(input)
+             #s.send('dir\r\n'.encode('ascii'))
+             s.send(input.encode('ascii'))
+             time.sleep(1)
+             feedback = s.recv(32768)
+
+             try:
+                 print(feedback.decode('utf-8')) # INSERT A TRY/EXCEPT HERE TO CATCH THE ERROR AND KEEP THE REST OF THE PROGRAM RUNNING.
+             except:
+                 print("could not print response this time")
+
+             return
+
+        #---GET RESPONSE FROM REMOTE DEVICE
+        def RECIEVE_CMD(s):
+            y = s.recv(1024)
+            print(y.decode('utf-8'))
+            return y
+
+        #---DETERINE IF SOMETHING IS THERE
+        def LookForSomething(s, item):
+             while 1:
+                x = s.recv(1024)
+                if item.encode('ascii') in x:
+                    time.sleep(2)
+                    return 1
+                else:
+                    return 0
+
+        #---DETERINE IF SOMETHING IS NOT THERE
+        def CheckIfNotThere(s, item):
+             while 1:
+                x = s.recv(1024)
+                if item.encode('ascii') not in x:
+                    time.sleep(2)
+                    return 1
+                else:
+                    return 0
+
+        #---Wait for the promt to send anything back to PC
+        def WaitForPrompt(s):
+             print('SEND WAIT')
+             s.send('\r\n'.encode('ascii'))
+             while 1:
+                x = s.recv(1024)
+                if 'DMPS3-4K-150-C'.encode('ascii') in x:
+                    time.sleep(2)
+                    break
+                else: print('.', end="")
+             return
+
+
+        #--Wait until the device has finished rebooting after the reboot command has been sent to it.
+        def WaitForInputItem(s, input):
+            print('REACHED WaitForInputItem')
+            time.sleep(10)
+            start_time = int(round(time.time()))
+            s.send('dir temp\r\n'.encode('ascii'))# This command has no real purppose other than to trigger a response from the device.-
+            while 1:                                            #If this random message/cmd is sent to the device then the device will not send any data and the program will get stuck.
+                #s.send('dir temp\r\n'.encode('ascii'))
+                end_time = int(round(time.time()))
+                #time.sleep(1)
+                #s.setblocking(0)
+                time.sleep(5)
+                #print('\nGOT TO PROBLEM\n')
+                try:
+                    y = s.recv(1024)# INCREASE THE SIZE OF THE IMPUT BUFFER
+                    print('.',end="")
+                   # print('\n', y, '\n')
+                except:
+                    print('PROBLEM OCCURED. NO RESPONSE RECIEVED FROM REBOOTED DEVICE')
+
+                if input in y.decode('utf-8'):
+                    print('INPUT ITEM FOUND!!\n')
+                    #print(y.decode('utf-8'))
+                    time.sleep(65)
+                    break
+                #elif (end_time - start_time) >= 300:
+                #    print('TIMOUT OF 5 MINUTES REACHED. Deleting files and CONTINUING WITH THE PROGRAM ANYWAY')
+                #    delPrevTemp(s)
+                #    break
+                else:
+                    print('.',end="")
+            #s.setblocking(1)
+            return
+
+
+        def ConvertTo_Ascii(x):
+            z = x.encode('ascii')
+            return z
+
+        def ConvertTo_utf_8(x):
+            z = x.decode('utf-8')
+            return z
+
+
+
+
+
+        # Using multiplel threads to make it go faster by scanner more than 1 port at a time.
+        class myThread (threading.Thread):
+            def __init__(self,name, min_range, max_range, remoteServerIP):
+                threading.Thread.__init__(self)
+                self.name = name
+                self.min_range = min_range
+                self.max_range = max_range
+                self.remoteServerIP = remoteServerIP
+            def run(self):
+               # print(self.name)
+                # Using the range function to specify ports (here it will scans all ports between 1 and 1024)
+                # We also put in some error handling for catching errors
+                try:
+                    for port in range(self.min_range, self.max_range ):
+                        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                        result = sock.connect_ex((self.remoteServerIP, port))
+                        if result == 0:
+                            print ("\nPort {}: \t Open".format(port))
+                            print (" hostname is: ",socket.gethostbyaddr(self.remoteServerIP)[0] )
+                            try:
+                                print(" server name is: ",socket.getservbyport(port) )
+                            except:
+                                print('could not connect to this server \n')
+
+                       # else: print(".",end="")
+
+
+                        sock.close()
+                   #print(self.name + 'done \n')
+
+
+                except KeyboardInterrupt:
+                    print ("You pressed Ctrl+C")
+                    sys.exit()
+
+                except socket.gaierror:
+                    print ('Hostname could not be resolved. Exiting')
+                    sys.exit()
+
+                except socket.error:
+                    print ("Couldn't connect to server")
+                    #sys.exit()
+
+
+
+
+        class Example(Frame):
+            def __init__(self, parent):
+                Frame.__init__(self, parent)
+                self.parent = parent
+
+
+
+                # self.createTextBoxes()
+                #self.create_widgets()
+                self.IP = 0
+                self.exit_loop = 0
+                self.y = '.'
+                self.scroll_size = 6000
+                self.textfield_row = (7*50) # these are for the dynamically created text field boxes
+                self.textfield_column = 150
+                self.textfield_count = 0
+                self.textfield_array = []
+                self.e1 = []
+                self.e2 = []
+                #USER INPUTS FOR DYNAMICALLY CREATED TEXTFIELD COMMANDS
+                self.userinput_row = (50*7)
+                self.userinput_column = (1*50)+150
+                self.userinput_array = []
+                self.userinput_count = 0
+
+                #inputs for the searches in send command
+                self.searchinput_array = []
+                self.searchinput_count = 0
+                self.searchinput_row = (7*50)
+                self.searchinput_column = (50*3)+150
+                #inputs for "not there" searches"
+                self.searchinput_array2 = []
+                self.check_box_array = []
+                self.check_box_array2 = []
+
+
+
+                self.initUI()
+
+
+
+            def send(self):
+                  SEND_CMD(self.IP,self.e2,self.e3,self.e4, self.check_box, self.check_box2)
+                  self.t3 = threading.Thread(target= self.send)
+                  return
+
+
+            def lookForInput(self):
+                 LookForSomething(self.IP, self.item)
+                 return
+
+            #def WaitPrompt(self):
+            #    WaitForPrompt(self.IP)
+            #    return
+
+            def onClick(self,e1):
+                 print("BUTTON CLICKED!!")
+                 self.IP = Connect(e1)
+                 #print('asdf : ', self.IP)
+                 return
+
+
+            def exit(self):
+                self.exit_loop = 1
+                self.t9 = threading.Thread(target= self.exit)
+                return
+
+
+            def scan(self):
+                    print("Scanning IP Address for all open ports")
+                    scanPorts(self.e1.get())
+                    self.t2 = threading.Thread(target= self.scan)
+                    return
+
+
+            def CreateLoop(self): # after testing create and pass another variable array in here holding the dynamicly created text fields.
+                    function_array = [2]# make this a variable passed in that is ioncremented in the other function.
+                   # input_array = [e3.get(),e4.get()]
+                    num = 0
+                    while num < self.textfield_count:
+                        if self.textfield_array[num].get() == 'connect':
+                            self.IP = Connect(self.e1.get(),70000)#this number is not a possible port and thus the default console port will be used in this function. 70000 is just a placeholder
+                           # function_array.append(Connect(e1))
+                        elif self.textfield_array[num].get() == 'send':
+                            SEND_CMD(self.IP, self.userinput_array[num].get(),self.e3.get,self.e4.get(),self.check_box.get(),self.check_box2.get())
+                            #function_array.append(self.send(e2))
+                        elif self.textfield_array[num].get() == 'wait':
+                                DELAY(self.userinput_array[num].get())
+                        elif self.textfield_array[num].get() == 'scan for open ports':
+                               scan()
+
+                        else:
+                           # function_array.append(print ('invalid cmd'))
+                           print(num)
+                        num = num + 1
+                    self.t1 = threading.Thread(target = self.CreateLoop) # reset the thread after it closes so that it can be use again at the next button click.
+                    return
+
+
+            def CreateInfiniteLoop(self):
+                    go = 1
+                    result = 0
+                    self.IP = Connect(self.e1.get(),70000)#-------------connect to the device
+                    if self.check_box_init_cmd.get() == 1:
+                        SEND_ONCE(self.IP, self.init_cmd.get())
+                    while 1:
+                        num = 0
+                        while num < self.textfield_count:
+                            if self.textfield_array[num].get() == 'connect to ip':
+                                self.IP.close()
+                                #time.sleep(1) ### if not field then use self.e1 ip address.
+                                if not self.userinput_array[num].get():
+                                    self.IP = Connect(self.e1.get(), self.searchinput_array[num].get()) #gets port number
+                                else:
+                                    self.IP = Connect(self.userinput_array[num].get(), self.searchinput_array[num].get()) #gets port number
+
+                                # function_array.append(connect(e1))
+                            elif self.textfield_array[num].get() == 'send':
+                                result = SEND_CMD(self.IP, self.userinput_array[num].get(),self.searchinput_array[num].get(),self.searchinput_array2[num].get(),self.check_box_array[num].get(),self.check_box_array2[num].get())
+                                #function_array.append(self.send(e2))
+                                print("HERE.....", self.userinput_array[num].get(), self.searchinput_array[num].get())
+
+                            elif self.textfield_array[num].get() == 'wait':
+                                DELAY(self.userinput_array[num].get())
+                            elif self.textfield_array[num].get() == 'scan for open ports':
+                                scan()
+
+                            else:
+                                # function_array.append(print ('invalid cmd'))
+                                print(num)
+                            num = num + 1
+                        #print(self.IP.recv(1024).decode('utf-8'))
+                        if self.exit_loop == 1:
+                            time.sleep(1)
+                            self.exit_loop = 0
+                            break
+                        elif result == 1:
+                            break
+
+                    self.t5 = threading.Thread(target= self.CreateInfiniteLoop)
+                    return
+
+
+
+
+            def CreateTextField(self):
+                   #e = Entry(self.master)
+                   L = ['connect to ip', 'wait', 'send', 'scan for open ports']
+                   var1 = tkinter.StringVar(self.master)
+                   e = tkinter.OptionMenu(self.master, var1, *L)
+                   #e.grid(row=self.textfield_row, column=self.textfield_column)
+                   e_window = self.canvas1.create_window(self.textfield_column , self.textfield_row, anchor=NW, window = e)
+                   self.textfield_array.append(var1)
+
+                   #USER INPUTS
+                   eu = Entry(self.master)
+                   #eu.grid(row= self.userinput_row, column= self.userinput_column)
+                   eu_window = self.canvas1.create_window(self.userinput_column + 100, self.userinput_row)
+                   self.userinput_array.append(eu)
+
+
+                   #Search for item inputs.(optional feature)
+                   Label_window = self.canvas1.create_window(self.searchinput_column, self.searchinput_row, anchor = NW, window = Label(self.master, text="selected port(for connect cmd)/ \nLook for something upon sending"))
+                   search = Entry(self.master)
+                   #search.grid(row=self.searchinput_row, column=self.searchinput_column + 1)
+                   search_window = self.canvas1.create_window(self.searchinput_column + (100*2), self.searchinput_row, anchor=NW, window = search)
+                   self.searchinput_array.append(search)
+
+                   box = IntVar()
+                   box_window = self.canvas1.create_window( self.searchinput_column + (110*3), self.searchinput_row, anchor =NW, window = Checkbutton(self.master, text="ON/OFF", variable= box))
+                   self.check_box_array.append(box)
+
+                   #Search is something is not there.
+                   Label_window2 = self.canvas1.create_window(self.searchinput_column + (107*4), self.searchinput_row, anchor =NW, window =Label(self.master, text="Check if not there"))
+                   search_2 = Entry(self.master)
+                   #search_2.grid(row=self.searchinput_row, column=self.searchinput_column + 4)
+                   search_2_window = self.canvas1.create_window(self.searchinput_column + (109*5), self.searchinput_row,  anchor = NW, window = search_2)
+                   self.searchinput_array2.append(search_2)
+
+                   box2 = IntVar()
+                   box2_window = self.canvas1.create_window(self.searchinput_column + (114*6), self.searchinput_row, anchor = NW, window=Checkbutton(self.master, text="ON/OFF", variable=box2))
+                   self.check_box_array2.append(box2)
+
+                   #Increment the position value for newly created input fields and labels
+                   self.textfield_count = self.textfield_count + 1
+                   self.textfield_row = self.textfield_row + 50
+                   self.userinput_count = self.userinput_count + 1
+                   self.userinput_row = self.userinput_row + 50
+                   self.searchinput_count = self.searchinput_count + 1
+                   self.searchinput_row = self.searchinput_row + 50
+                   self.scroll_size = self.scroll_size + 55
+                   self.t8 = threading.Thread(target= self.CreateTextField)
+
+                   return
+
+            def create(self,canvas1):
+                 w = canvas1.create_window(50, 600, anchor=NW, window = Label(self.master, text="Check if not there"))
+                 print("got here")
+
+
+            def initUI(self):
+                self.parent.title("Layout Test")
+                self.config(bg = '#F0F0F0')
+                self.pack(fill = BOTH, expand = 1)
+
+
+                #create canvas
+                self.canvas1 = Canvas(self, relief = FLAT, background = "#40E0D0",
+                                                    width = 180, height = 600, scrollregion=(0,0,2000,self.scroll_size))#"#D2D2D2"
+                self.canvas1.pack(side = TOP, anchor = NW, padx = 10, pady = 10)
+                #add quit button
+                button1 = Button(self, text = "Quit", command = lambda: self.create( self.canvas1), anchor = W)#########################################################################
+                button1.configure(width = 40, activebackground = "#33B5E5", relief = FLAT)
+                button1_window = self.canvas1.create_window(10, 10, anchor=NW, window=button1)
+
+                 #IP ADDRESS BUTTONS/run command
+                self.t1 = threading.Thread(target = self.CreateLoop)
+                btn1 = Button(self.master, text = " Run Commands", command = lambda: self.t1.start())
+                btn1_window = self.canvas1.create_window(10, 50, anchor=NW, window=btn1)
+
+                #Quit Button
+                btn_Q = Button(self.master, text='quit2.0', command=self.master.quit)
+                Button_window = self.canvas1.create_window(10, 100, anchor=NW, window=btn_Q)
+
+
+                #PORT SCAN BUTTONS
+                self.t2 = threading.Thread(target= self.scan)
+                btn2 = Button(self.master, text = " scan all ports", command =lambda: self.t2.start())
+                btn2_window = self.canvas1.create_window(10, 150, anchor=NW, window=btn2)
+
+                #5th button RUN Infinite Loop
+                self.t5 = threading.Thread(target= self.CreateInfiniteLoop)
+                btn5 = Button(self.master, text = " Run as infinite loop", command = lambda: self.t5.start())
+                btn5_window = self.canvas1.create_window(10,200, anchor=NW, window=btn5)
+
+                #8th button ADD NEW TEXT FIELD
+                self.t8 = threading.Thread(target= self.CreateTextField)
+                btn8 = Button(self.master, text = "Add new cmd to loop",command =lambda: self.t8.start())
+                btn8_window = self.canvas1.create_window(10, 250, anchor=NW, window=btn8)
+
+
+
+
+
+
+
+                hbar=Scrollbar(self.canvas1,orient=HORIZONTAL)
+                hbar.pack(side=BOTTOM,fill=X)
+                hbar.config(command=self.canvas1.xview)
+                vbar=Scrollbar(self.canvas1,orient=VERTICAL)
+                vbar.pack(side=RIGHT,fill=Y)
+                vbar.config(command=self.canvas1.yview)
+
+                self.canvas1.config(width=100,height=100)
+                self.canvas1.config(xscrollcommand=hbar.set, yscrollcommand=vbar.set)
+                self.canvas1.pack(side=LEFT,expand=True,fill=BOTH)
+
+
+
+
+        def main():
+            root = Tk()
+            root.geometry('800x600+10+50')
+            app = Example(root)
+            root.mainloop()
+
+        if __name__ == '__main__':
+            main()
+
+
+      </code>
+    </pre>
+  </div>
+  
+  <script src="js/shCore.js"></script>
+  <script src="js/shBrushCpp.js"></script>
+  <script>
+    SyntaxHighlighter.all()
+  </script>
+  <script src="js/Ariel_Site.js"></script>
+  </body>
+  </html>

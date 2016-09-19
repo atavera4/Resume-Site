@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script type="text/javascript" src="js/jQuery.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Roboto:100italic' rel='stylesheet' type='text/css'>
+  <link href="css/bootstrap-theme.css" rel="stylesheet">
+  <link href="css/bootstrap.css"  rel="stylesheet">
+  <link href="css/site.css" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Lato:100,300' rel='stylesheet' type='text/css'>
+  <title> My Site </title>
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <script type="text/javascript" src="js/jQuery.js"></script>
+  <script type="text/javascript" src="js/bootstrap.min.js"></script>
+  <link href="css/site.css" rel="stylesheet">
+
+  <script src="https://www.google.com/uds/api?file=uds.js&v=1.0&key=YOURKEYHERE" type="text/javascript"></script>
+  <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js?autoload=true&amp;skin=sunburst&amp;lang=css" defer="defer"></script>
+
+
+</head>
+
+<body class="BodyBackground1 " onload="prettyPrint()">
+  <div id="Main" class="container TransparentBackgroundBlack">
+
+    <div class="row Description-font">
+      <p>
+
+        <pre>
+
+
+          This project consisted of
+
+        </pre>
+      </p>
+    </div>
+
+  <div class="row">
+
+    <a class= "col-md-12 Font-Ariel2" id="button1" href="#">Show/Hide C++ File</a>
+
+    <pre class="prettyprint" id="code_1" style="border:4px solid #88c">
+      <code >
+
+        //
+        //  OSproject4.cpp
+        //
+        //
+        //  Created by Ariel Taveras on 11/6/15.
+        //
+        //
+
+        #include "stdafx.h"
+        #include "Header2.h"
+
+        /*
+        	NOTE To Compile on TJW LINUX USE cmd:
+        	< g++ -std=c++0x -pthread OSProject4.cpp -o main
+        */
+        int main()
+        {
+        	//declare main function variables for user input.
+        	monitor.seconds = 0;
+        	monitor.milliseconds = 0;
+        	monitor.r = 0; // number of readers
+        	monitor.w = 0; // number of writers
+        	monitor.R_delay = 0; //delay for reader to restart
+        	monitor.W_delay = 0; // delay for writer to restart
+        	int user_preference;
+        	string input_file;
+        	string output_file;
+        	sem_init(&Reader_Writer_Threads_Completed, 0, 0); // initialize semaphore to 0.
+
+        	//Get the current Wall Clock Time to initialize the DB variables.
+        	get_wall_time_ints(&monitor.seconds, &monitor.milliseconds);
+
+        	//Prompt the user to select a mode for inputs.
+        	cout << " Select a method for getting User Inputs:" << endl;
+        	cout << "	To input your own parameters enter a 0 here" << endl;
+        	cout << "	To use the time_functions.h path's enter a 2 here" << endl;
+        	cout << "	To use input from a file enter any other number here" << endl;
+
+        	cin >> user_preference;
+
+        	if (user_preference == 0)
+        	{
+        		//Ask user for all inputs
+        		cout << "Enter the number of Readers" << endl;
+        		cin >> monitor.r;
+        		cout << "Enter the delay for each Reader" << endl;
+        		cin >> monitor.R_delay;
+        		cout << "Enter the number of Writers" << endl;
+        		cin >> monitor.w;
+        		cout << "Enter the delay for each Writer" << endl;
+        		cin >> monitor.W_delay;
+        		cout << "Enter the output file path here" << endl;
+        		cin >> output_file;
+        	}
+        	else if (user_preference == 2)
+        	{
+        		char fullfilepath_in[30];
+        		char fullfilepath_out[30];
+        		char thisprojectfile_in[13];
+        		char thisprojectfile_out[14];
+        		strcpy(thisprojectfile_in, "project3_in.txt");
+        		strcpy(thisprojectfile_out, "project3_out.txt");
+
+        		strcpy(fullfilepath_in, filebase); // copy filebase from time_functions.h into fullfilepath
+        		strcpy(fullfilepath_out, filebase);
+        		strcat(fullfilepath_in, thisprojectfile_in); // combine path and name
+        		strcat(fullfilepath_out, thisprojectfile_out);
+
+        		//Convert the char arrays into strings.
+        		input_file = string(fullfilepath_in);
+        		input_file = string(fullfilepath_out);
+        	}
+        	else
+        	{
+        		cout << "Enter the input file path here" << endl;
+        		cin >> input_file;
+        		cout << "Enter the output file path here" << endl;
+        		cin >> output_file;
+
+        		fstream input_params_file;
+        		input_params_file.open(input_file);
+        		char character = '0';
+        		int i; char j;
+        		for (i = 0; i < 7; i++)
+        		{
+        			character = input_params_file.get();
+        			if (i == 0) { monitor.r = atoi(&character); }
+        			else if (i == 2) { monitor.R_delay = atoi(&character); }
+        			else if (i == 4) { monitor.w = atoi(&character); }
+        			else if (i == 6) { monitor.W_delay = atoi(&character); }
+        		}
+        	}
+
+
+
+
+
+        	// Create arrays for the reader and writer threads using new from C++ instead of malloc
+        	pthread_t* Readers = new pthread_t[monitor.r];
+        	pthread_t* Writers = new pthread_t[monitor.w];
+        	int reader_t;
+        	int writer_t;
+
+        	//create all of the Reader threads
+        	for (reader_t = 0; reader_t < monitor.r; reader_t++)
+        	{
+        		ThreadData* Data = new ThreadData;
+        		//Data->time = current time
+        		Data->file_in = input_file;
+        		Data->file_out = output_file;
+        		Data->ID = reader_t;
+        		Data->type = 'r';
+        		pthread_create(&Readers[reader_t], NULL, ReaderFunction, (void*)Data);
+        	}
+        	//Create all of the Writer threads
+        	for (writer_t = 0; writer_t < monitor.w; writer_t++)
+        	{
+        		ThreadData* Data = new ThreadData;
+        		//Data->time = current time
+        		Data->ID = writer_t;
+        		Data->type = 'w';
+        		pthread_create(&Writers[writer_t], NULL, WriterFunction, (void*)Data);
+        	}
+
+        	//Join all of the threads for Synchronization.
+        	for (reader_t = 0; reader_t < monitor.r; reader_t++)
+        	{
+        		pthread_join(Readers[reader_t], NULL);
+        	}
+        	for (writer_t = 0; writer_t < monitor.w; writer_t++)
+        	{
+        		pthread_join(Writers[writer_t], NULL);
+        	}
+
+        	/*Main thread will begin polling to check for the completion of all Reader/Writer threads,
+        		since it has no other job to do until the threads have run to completion.*/
+        	int num_of_finished_threads = 0;
+        	while(true)
+        	{
+        	sem_getvalue(&Reader_Writer_Threads_Completed, &num_of_finished_threads);
+        	if(num_of_finished_threads == (monitor.r + monitor.w))
+        		{
+        			cout << " All threads Complete. DONE " << num_of_finished_threads << endl;
+        			break;
+        		}
+        	}
+
+        	cout << "Enter any input to close" << endl;
+        	char close;
+        	cin >> close;
+        	return 0;
+        }
+
+
+        // THREAD Entry FUNCTIONS
+        void* ReaderFunction(void* Data)
+        {
+        	/* When a reader thread starts it immediatly tries to enter the monitor Class. */
+        	//cout << 'a';// << endl;
+        	ThreadData* Data_t = (ThreadData *)Data;
+        	int i;
+        	for (i = 0; i <= 10; i++)
+        	{
+        		//critical section is located in a function that lies within this function.
+        		monitor.EnterMonitorQueue(Data_t);
+        		millisleep(monitor.R_delay);
+        	}
+        	//Semaphore is incremented each time a thread completes.
+        	sem_post(&Reader_Writer_Threads_Completed);
+        	return (void*)0;
+
+        }
+        void* WriterFunction(void* Data)
+        {
+        	/* When a writer thread starts it immediatly tries to enter the monitor Class.*/
+        	//cout << 'W' << endl;
+        	ThreadData* Data_t = (ThreadData *)Data;
+        	int i;
+        	for (i = 0; i <= 10; i++)
+        	{
+        		monitor.EnterMonitorQueue(Data_t);
+        		millisleep(monitor.W_delay);
+        	}
+        	//Semaphore is incremented each time a thread completes.
+        	sem_post(&Reader_Writer_Threads_Completed);
+        	return (void*)0;
+        }
+
+      </code>
+    </pre>
+  </div>
+
+
+  <div class="row">
+
+    <a class="col-md-12 Font-Ariel2" id="button2" href="#">Show/Hide Monitor.h File</a>
+    <pre class="prettyprint" id="code_2" style="border:4px solid #88c">
+      //
+      //  OSproject4.cpp
+      //
+      //
+      //  Created by Ariel Taveras on 11/6/15.
+      //
+      //
+      #pragma once
+
+      #include <pthread.h>
+      #include <semaphore.h>
+      #include <stdio.h>
+      #include <stdlib.h>
+      #include <string>
+      #include <string.h>
+      #include "time_functions.h"
+      #include <iostream>
+      #include <fstream>
+      using namespace std;
+
+      typedef struct DataBase {
+
+      	int time;
+      	int seconds;
+      	int milliseconds;
+
+      }DataBase;
+
+      /*
+      	This data struct will contain all data needed by each reader/writer thread.
+      	A unique structure will be created for each thread.
+      */
+
+      typedef struct ThreadData {
+
+      	int time;
+      	int ID;
+      	char type;
+      	int count;
+      	string file_in;
+      	string file_out;
+
+      }ThreadData;
+
+      void* WriterFunction(void* Data);
+      void* ReaderFunction(void* Data);
+
+      class MonitorClass {
+
+      public:
+
+      	//The following variables are declared here b/c they are common to all threads and functions.
+      	//Database variables
+      	int seconds;
+      	int milliseconds;
+      	//User input Params.
+      	int r; // number of readers
+      	int w; // number of writers
+      	int R_delay; //delay for reader to restart
+      	int W_delay; // delay for writer to restart
+
+      	pthread_mutex_t Lock; // Mutex used to protect the condition variables.
+      	pthread_mutex_t IOsync_lock; // Mutex used to sync the File IO for the reader threads.
+      	pthread_cond_t Reader_queue; // Initialized to 1.  these pthread types use signal commands from the pthreads library.
+      	pthread_cond_t Writer_queue; // Init to 1.
+      	//int init1 = pthread_cond_init(&Reader_queue, NULL);
+      	//int init2= pthread_cond_init(&Writer_queue, NULL);
+
+      	void EnterMonitorQueue(ThreadData* thread_info);
+      	void EnterMonitor(ThreadData* thread_info);
+
+      private:
+
+      	void ReadFromDataBase(ThreadData* thread_info);
+      	void WriteToDataBase(ThreadData* thread_info);
+      };
+
+
+      /*
+      	Create instance of the monitor class and a
+      	Semaphore used to detect when all (r + w) threads are complete.
+      */
+      MonitorClass monitor;
+      sem_t Reader_Writer_Threads_Completed;
+
+
+      //Monitor Class Function Definitions
+
+      /*
+      	This function is called directly by the reader/writer threads.
+
+      	All Readers can read at the same time with apparent concurrency.
+      	If a writer arrives all readers in the queue must finish but only 1
+      	writer thread can enter the monitor until the writer thread finishes.
+
+      	To meet the conditions specified above the function will check to see whether it is being called
+      	by a reader thread or a writer thread:
+      		If a reader is calling the function then it will be allowed
+      		to call the "EnterMonitor" function right away since more than 1 reader can be in the monitor at once.
+
+      		If a writer is calling the function and there is no other writer in the monitor, then it will Lock the "EnterMonitor" function call so that no
+      		other reader/writer threads can gain access to the monitor until the writer is done and unlocks the
+      		function call for the other threads.
+      		If on the other hand there is already a writer thread in the monitor, then the incoming writer
+      		thread will be placed on the queue until the writer that is inside the monitor in complete and unlock
+      		the "Lock" mutex.
+      */
+      void MonitorClass::EnterMonitorQueue(ThreadData* thread_info)
+      {
+      	/*First thread to call this function will cause it to set the queue to 0.
+      		all others will call the wait function and decrement to get a spot on the queue.*/
+      	// pthread_cond_signal(&Reader_queue);
+      	if (thread_info->type == 'r')
+      	{
+      		/* This will be signaled as soon as the reader enters the
+      			monitor in order Let all Readers read concurrently.*/
+      		pthread_cond_wait(&Reader_queue, &Lock);
+      	}
+      	else
+      	{
+      		/*Lock the Critical section of code HERE FOR THE READERS and any other writer
+      			thread, if a new writer comes in UNTIL the writer queue is empty again.*/
+      		pthread_cond_wait(&Writer_queue, &Lock);
+      	}
+
+      	//Enter the critical Section of the Reader or Writer threads.
+      	EnterMonitor(thread_info);
+      	return;
+      }
+
+
+      /*
+      	This function is called by both reader and wrter allows a thread to enter the monitor. Once inside,
+      	the thread will now have access to the protected variables and functions that belong to the monitor.
+
+      */
+      void MonitorClass::EnterMonitor(ThreadData* thread_info)
+      {
+      	if (thread_info->type == 'r')
+      	{
+
+      		//pthread_cond_signal(&Reader_queue);
+      		//Check to see if it is OK  to read.
+      		ReadFromDataBase(thread_info);
+      	}
+      	else
+      	{
+      		WriteToDataBase(thread_info);
+      		pthread_cond_signal(&Writer_queue);
+      	}
+      	return;
+      }
+
+
+      /*
+      	This function will be accessed by a reader thread. Since more than 1 reader is
+      	allowed to be in the monitor at any given time (option b. as specifed by instructor).
+      	Because of this an IO Lock "IOsync_lock" is needed to make sure that more than 1 reader does not
+      	attempt to output to the file or cmd line at the same time.
+      */
+      void MonitorClass::ReadFromDataBase(ThreadData* thread_info)
+      {
+      	fstream output_file;
+      	output_file.open(thread_info->file_out);
+
+      	//Lock the IO for the readers.
+      	//pthread_mutex_lock(&IOsync_lock);
+
+      	cout << "Reader thread" << "seconds: " << seconds << "milliseconds" << milliseconds << endl;
+      	output_file << "Reader thread" << "seconds: " << seconds << "  " << "milliseconds" << milliseconds << endl;
+
+      	// Unlock the IO for other readers.
+      	//pthread_mutex_unlock(&IOsync_lock);
+      	output_file.close();
+      	return;
+      }
+
+
+      /*
+      	This function will be accessed by a writer thread. Only 1 writer thread can call this function
+      	at any given time. No reader threads are allowed to enter the monitor during this time either.
+      	Here the writer thread does not need to lock the IO b/c only 1 writer thread is allowed to get
+      	here to begin with and no reader threads can access the monitor as well.
+      	*/
+      void MonitorClass::WriteToDataBase(ThreadData* thread_info)
+      {
+      	ofstream output_file;
+      	output_file.open(thread_info->file_out);
+      	//UPDATE THE TIME USING TIME_FUNCTIONS.H. Get Wall Clock Time
+      	get_wall_time_ints(&seconds, &milliseconds);
+      	cout << "Writer thread" << "seconds: " << seconds << "milliseconds" << milliseconds << endl;
+      	output_file << "Writer thread" << "seconds: " << seconds << "  " << "milliseconds" << milliseconds << endl;
+      	output_file.close();
+      	return;
+      }
+    </pre>
+  </div>
+
+
+
+  <script src="js/shCore.js"></script>
+  <script src="js/shBrushCpp.js"></script>
+  <script> SyntaxHighlighter.all() </script>
+  <script src="js/Ariel_Site.js"></script>
+  <script>
+    $("#code_1").toggle();
+    $("#code_2").toggle();
+  </script>
+  <script>
+      $("#button1").click(function() {
+          $("#code_1").toggle();
+      })
+  </script>
+  <script>
+      $("#button2").click(function() {
+          $("#code_2").toggle();
+      })
+  </script>
+
+</body>
+</html>

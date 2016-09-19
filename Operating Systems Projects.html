@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link href="css/bootstrap-theme.css" rel="stylesheet">
+  <link href="css/bootstrap.css"  rel="stylesheet">
+  <link href="css/shCore.css" rel="stylesheet" type="text/css" />
+  <link href="css/shThemeDefault.css" rel="stylesheet" type="text/css" />
+  <link href="css/site.css" rel="stylesheet">
+  <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js?autoload=true&amp;skin=sunburst&amp;lang=css" defer="defer"></script>
+
+
+</head>
+
+<body class="BodyBackground1" onload="prettyPrint()">
+  <div id="Main" class="container TransparentBackgroundBlack ">
+  <p>
+    This is the second project done for the Operating systems course.
+    the objective here was to learn the use of the concepts:
+    mutual exclusion, multi-threaded programming, semaphores,
+    mutexes and their effect on program throughput by allowing
+    overlapping of I/O with CPU processing.
+
+    The following C++ code is the program that I wrote to complete the task.
+    It uses a circular (bounded) buffer with semaphores. The semaphores
+    were created using the 'semaphore' and 'pthreads' library in order to maintain code
+    compatibility for both windows and linux systems.
+
+  </p>
+
+  <pre class="prettyprint" id="quine" style="border:4px solid #88c"><code>
+    //
+  //  OSproject2.cpp
+  //
+  //
+  //  Created by Ariel Taveras on 10/8/15.
+  //
+  //
+  #include "stdafx.h"
+  #include <stdio.h>
+  #include <stdlib.h>
+  #include <iostream>
+  //#include <assert.h>
+  #include <string>
+  #include <fstream>
+  #include <semaphore.h>
+  #include <pthread.h>
+  #include "time_functions.h"
+  using namespace std;
+
+  typedef struct ThreadParameters {
+  	string input_file_path;
+  	string output_file_path;
+  	string array_buffer[10]; // an array of strings or lines.
+  	int slots_filled;
+  	bool end_of_file_reached = 1;
+  }ThreadParameters;
+
+  //Declaration of Semaphores.
+  sem_t is_buffer_clear;
+  sem_t is_buffer_full;
+  sem_t buffer_slots_filled;
+
+
+  //BUFFER WRITER
+  void* ReadFromFile(void* k)
+  {
+  	ThreadParameters *Thread_Params = static_cast<ThreadParameters*>(k);
+  	fstream input_file;
+  	//input_file.open("inputfile.txt");
+  	input_file.open(Thread_Params->input_file_path);
+
+  	while (Thread_Params->end_of_file_reached)
+  	{
+  		sem_wait(&is_buffer_clear);
+  		sem_getvalue(&buffer_slots_filled, &Thread_Params->slots_filled);
+
+  		while (Thread_Params->slots_filled < 10)
+  		{
+  			Thread_Params->end_of_file_reached = (bool)getline(input_file, Thread_Params->array_buffer[Thread_Params->slots_filled]); //the # of slots filled is the current position in array buffer.
+  			sem_post(&buffer_slots_filled);
+  			sem_getvalue(&buffer_slots_filled, &Thread_Params->slots_filled);
+
+  			if (Thread_Params->end_of_file_reached == 0) {
+  				Thread_Params->array_buffer[Thread_Params->slots_filled - 1] = "END OF FILE";
+  				//cout << Thread_Params->array_buffer[Thread_Params->slots_filled-1] << endl;
+  				break;
+  			}
+  		}
+  		sem_post(&is_buffer_full);
+  	}
+  	return k;
+  }
+
+  //BUFFER READER
+  void* WriteToFile(void* L)
+  {
+  	ThreadParameters *Thread_Params = static_cast<ThreadParameters*>(L);
+  	ofstream output_file;
+  	//output_file.open("outputfile.txt");
+  	output_file.open(Thread_Params->output_file_path);
+  	int slot_position = 0;
+  	start_timing();
+  	while (Thread_Params->end_of_file_reached)
+  	{
+  		sem_wait(&is_buffer_full);
+  		sem_getvalue(&buffer_slots_filled, &Thread_Params->slots_filled);
+
+  		while (Thread_Params->slots_filled > 0)
+  		{
+  			sem_wait(&buffer_slots_filled);
+  			if (Thread_Params->end_of_file_reached == 0)
+  			{
+  				if ((Thread_Params->array_buffer[Thread_Params->slots_filled - 1]) == "END OF FILE") { output_file << ""; }//detect the END OF FILE SYMBOL
+  				else
+  				{
+  					//cout << Thread_Params->array_buffer[slot_position] << endl;
+  					output_file << Thread_Params->array_buffer[slot_position] << endl;
+  					slot_position++;
+  				}
+  			}// went back up. need it to start at 0 and go until end of buffer instead/go in inverse.
+  			else
+  			{
+  				//cout << Thread_Params->array_buffer[9 - (Thread_Params->slots_filled - 1)] << endl;
+  				output_file << Thread_Params->array_buffer[9 - (Thread_Params->slots_filled - 1)] << endl;
+  			}
+  			sem_getvalue(&buffer_slots_filled, &Thread_Params->slots_filled);
+  		}
+  		slot_position = 0;
+  		sem_post(&is_buffer_clear);
+  	}
+  	stop_timing();
+  	cout << "wall clock time was " << get_wall_clock_diff() << endl;
+  	cout << "CPU time was  " << get_CPU_time_diff() << endl;
+  	return L;
+  }
+
+  int main()
+  {
+  	sem_init(&is_buffer_clear, 0, 1);
+  	sem_init(&is_buffer_full, 0, 0);
+  	sem_init(&buffer_slots_filled, 0, 0);
+
+  	static ThreadParameters thread_params;//changed type to pointer
+
+  	cout << "Enter the full path for the INPUT file here" << endl;
+  	cin >> thread_params.input_file_path;
+  	cout << "Now Enter the full path for the OUTPUT file here" << endl;
+  	cin >> thread_params.output_file_path;
+
+  	pthread_t read_file;
+  	pthread_t write_file;
+
+  	pthread_create(&read_file, NULL, ReadFromFile, (void*)&thread_params);
+  	pthread_create(&write_file, NULL, WriteToFile, (void*)&thread_params);
+
+  	pthread_exit(NULL);
+
+  	return 0;
+  }
+
+
+  /*
+
+  g++ -c  OS_project2-2.cpp
+  g++ -lpthreads  OS_project2-2.o -o main
+  ./main
+
+  */
+
+
+  /*
+  sem_destroy(&is_buffer_clear);
+  sem_destroy(&is_buffer_full);
+  sem_destroy(&buffer_slots_filled);
+
+  <PreprocessorDefinitions>HAVE_STRUCT_TIMESPEC;WIN32;__GNU_LIBRARY__;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+  C:/Users/Ariel/Desktop/inputfile.txt
+  C:/Users/Ariel/Desktop/outputfile.txt
+
+  */</code>
+  </pre>
+</div>
+
+
+
+  <script src="js/shCore.js"></script>
+  <script src="js/shBrushCpp.js"></script>
+  <script>
+    SyntaxHighlighter.all()
+  </script>
+  <script src="js/Ariel_Site.js"></script>
+</body>
+</html>

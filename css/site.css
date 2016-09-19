@@ -1,0 +1,224 @@
+
+
+img {
+  height: = auto;
+  width: = auto;
+}
+body {
+  font-family: 'Lato', sans-serif;
+  color: #C84E41;
+  font-weight: 300;
+  /*background-image: url("../images/11.jpg");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;*/
+}
+
+.footer {
+  /*position:absolute;*/
+  bottom: 0;
+  font-size: 30px;
+  color: #BCBBBB;
+  width: inherit;
+  height: 80px;
+  background-color: #0F78A1;
+}
+
+.Font-Ariel4 {
+  font-size: 30px;
+  /*color: #6F121F;*/
+  /*font-weight: 300;*/
+}
+
+.Font-Ariel5 {
+  font-size: 15px;
+  color: white;
+}
+
+.marquee {
+  -webkit-marquee: up 3px infinite scroll normal;
+  marquee-direction: left;
+  overflow-y: -webkit-marquee;
+}
+.marqueeTitle {
+  -webkit-marquee: left 3px one scroll normal;
+  overflow-x: -webkit-marquee;
+}
+
+Ariel-margin {
+  margin-left: 60%;
+}
+
+.InfoBackground {
+  /*background-image: url("../images/11.jpg");
+  background-position: left;
+  background-attachment: fixed;
+  background-repeat: no-repeat;*/
+  /*background-color: #DE5E88;*/
+  background-color: rgba(253,68,19, .75);
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+  border-radius: 80px;
+  margin-right:5%;
+  margin-left: 0%;
+  margin-top:0%;
+  background-size: 100%;
+}
+
+.InfoBackground2 {
+  /*background-image: url("../images/11.jpg");
+  background-position: left;
+  background-attachment: fixed;
+  background-repeat: no-repeat;*/
+  /*background-color: rgba(229,156,107, 0.20);*/
+  background-color: rgba(202,180,252, 0.20);
+  -moz-border-radius: 12px;
+  -webkit-border-radius: 10px;
+  border-radius: 12px;
+  margin-right:10%;
+  margin-left: 0%;
+  margin-top:5%;
+  background-size: inherit;
+}
+
+.BodyBackground1 {
+  background-image: url("../images/11.jpg");
+  min-height: 500px;
+  background-attachment: fixed;
+  background-position: center;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+.BodyBackground2 {
+  background-image: url("../images/12.jpg");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+.BodyBackground3 {
+  background-image: url("../images/13.jpg");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+.TransparentBackgroundWhite {
+  background: rgba(245, 245, 245, 0.68);
+}
+
+.TransparentBackgroundBlack {
+  background: rgba(0, 0, 0, 0.70);
+}
+
+.TransparentBackgroundRed {
+  background: rgba(150, 10, 10, 0.85);
+}
+
+.transbox {
+    background-color: #ffffff;
+    border: 1px solid black;
+    opacity: 0.4;
+    filter: alpha(opacity=60); /* For IE8 and earlier */
+}
+
+
+.PanelColorThemeBlack {
+  background: rgba(0, 20, 50, 0.70);
+}
+.PanelColorTopThemeBlack {
+  background: rgba(0, 20, 50, 0.30);
+}
+
+.PanelColorThemeWhite {
+  background: rgba(0, 200, 400, 0.15);
+}
+.PanelColorTopThemeWhite {
+  background: rgba(200, 200, 200, 0.20);
+}
+
+.text-muted {
+  color: #BCBBBB;
+}
+
+.text-thin {
+  font-weight: 100;
+
+}
+
+.title-main {
+  font-size: 60px;
+}
+.title-margin {
+  margin-top: 30px;
+}
+
+.Font-Ariel {
+  font-size: 32px;
+  font-weight:bold;
+  color: white;
+}
+
+.Font-Ariel2 {
+  font-size: 26px;
+  font-weight:normal;
+  color: white;
+}
+
+.Font-Ariel3 {
+  font-size: 24px;
+  font-weight:bold;
+  color: blue;
+}
+
+.col-Ariel {
+  width: 100%;
+  font-size: 40px;
+  /*color: #6F121F;*/
+  margin-right: 30%;
+  margin-left: 43.95%;
+}
+
+.col-mdA-8 {
+  width: 66.66666667%;
+}
+
+.DescriptionScrollContainer {
+  height: 200px;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+.DescriptionScroll {
+  max-height: 200px;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 15px;
+  right: -17px; /* Increase/Decrease this value for cross-browser compatibility */
+  overflow-y: scroll;
+}
+
+.col-title-Ariel
+{
+  /*width: 66.66666667%;*/
+  /*margin-left: 1.65%;*/
+  font-size: 60px;*/
+}
+
+.col-md-4-Ariel {
+  float: left;
+  background: grey;
+  width: 33.33333333%;
+  color: white;
+}
+
+.row-Ariel {
+  margin-left: -15px;
+  margin-right: -15px;
+  background: grey;
+}
+
+.Description-font {
+  font-size: 12px;
+  font-weight:thin;
+  color: white;
+}
